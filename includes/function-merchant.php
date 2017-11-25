@@ -112,7 +112,7 @@ function function_merchant_feed_page() {
                                             <input class="form-control" id="end_product" name="end_product" value="1">
                                             <p class="help-block">Enter "0" to process all products.</p>
                                         </div>
-                                        
+
                                         <input type="hidden" id="process_OauthGoogle" name="process_OauthGoogle">
                                         <button type="submit" class="btn btn-default">Go Feed</button>
                                         <button type="reset" class="btn btn-default">Reset</button>
@@ -156,6 +156,10 @@ function delete_all_merchant_products() {
 
             if (isset($_POST['pages_number']) && $_POST['pages_number'] != 0) {
                 $_SESSION['pages_number'] = $_POST['pages_number'];
+            }
+            
+            if (isset($_POST['delete_localhost'])) {
+                $_SESSION['delete_localhost'] = $_POST['delete_localhost'];
             }
         }
         
@@ -210,14 +214,23 @@ function delete_all_merchant_products() {
 
                 printf("%s : %s <br/>", $product->getId(), $product->getTitle());
 
-                $countProduct++;
-                $offerIds[] = $product->getId();
-
+                if ($_SESSION['delete_localhost'] == 0) {
+                    $countProduct++;
+                    $offerIds[] = $product->getId();
+                } else {
+                    if (strpos($product->getLink(), 'localhost')!=false) {
+                        echo $product->getLink() . "<br/>";
+                        $countProduct++;
+                        $offerIds[] = $product->getId();
+                    }
+                }
+                
     //            $service->products->delete($_SESSION['merchant_id'], $product->getId());
 
-                if ($countProduct % 50 == 0) {
+                if ($countProduct % 200 == 0 && $countProduct!= 0) {
                     deleteProductBatch($service, $offerIds);
                     $offerIds = [];
+                    echo "<strong>DELETED " . $countProduct . " products.</strong><br/>";
                 }
             }
             // If the result has a nextPageToken property then there are more pages
@@ -234,6 +247,7 @@ function delete_all_merchant_products() {
 
         if (!empty($offerIds)) {
                 deleteProductBatch($service, $offerIds);
+                echo "DELETED " . $countProduct . " products.";
         }
 
         echo "ALL DONE.";
@@ -276,7 +290,13 @@ function delete_all_merchant_products() {
                                             <label>Number of Pages</label>
                                             <input class="form-control" id="pages_number" name="pages_number" value="20">
                                         </div>
-                                        
+                                        <div class="form-group">
+                                            <label>Delete localhost products</label>
+                                            <select class="form-control" id="delete_localhost" name="delete_localhost">
+                                                <option value="0" selected>No</option>
+                                                <option value="1">Yes</option>
+                                            </select>
+                                        </div>
                                         <input type="hidden" id="process_DeleteAllMerchant" name="process_DeleteAllMerchant">
                                         <button type="submit" class="btn btn-default">Go Delete</button>
                                         <button type="reset" class="btn btn-default">Reset</button>
