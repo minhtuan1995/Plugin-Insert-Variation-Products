@@ -21,7 +21,7 @@ if (!defined('WC_PLUGIN_URL')) {
     define('WC_PLUGIN_URL', plugin_dir_url(__FILE__));
 }
 
-define('MAX_PRODUCT_PAGE', 50);     // Number of product when process all products
+define('MAX_PRODUCT_PAGE', 100);     // Number of product when process all products
 //define('MAX_PRODUCT_PAGE', 10);     // Number of product when process all products
 //define('BATCH_SIZE', 25);
 
@@ -482,6 +482,10 @@ function iframe_shopify_feed_page() {
         wp_die(__('You do not have sufficient permissions to access this page.'));
     }
     
+//    insert_variation_prepare();
+        if (ob_get_level() == 0)
+        ob_start();
+    
     // Calculated Time
     $time_all = microtime(true);
     $time_getShopify = 0;
@@ -523,7 +527,7 @@ function iframe_shopify_feed_page() {
     
     echo "OAUTH2 DONE.<br/>";
 
-    insert_variation_prepare();
+    
 
     $input['shop_url'] = $_SESSION['shop_url'];
     $input['shop_api_key'] = $_SESSION['shop_api_key'];
