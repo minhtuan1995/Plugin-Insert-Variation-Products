@@ -72,19 +72,20 @@ class WooProducts {
         }
 
         //product_variation
-        $query = "SELECT ID FROM wp_posts WHERE post_parent = {$product['ID']} and post_type = 'product_variation'";
+        $query = "SELECT ID FROM wp_posts WHERE post_parent = {$product['ID']} and post_type = 'product_variation' limit 1";
 
         $result = mysqli_query($this->link, $query);
 
-        $return = mysqli_fetch_all($result, MYSQLI_ASSOC);
+//        $return = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        $return = mysqli_fetch_assoc($result);
 
         $product = $this->getProductMain($product);
 
         $variations = array();
 
         if (count($return) > 0) {
-
-            foreach ($return as $key => $variation) {
+            $variation = $return;
+//            foreach ($return as $key => $variation) {
                 $variation['post_title'] = $product['post_title'];
                 $variation['description'] = $product['description'];
                 $variation['link'] = $product['link'];
@@ -137,7 +138,7 @@ class WooProducts {
                 }
                 // Save variation
                 $variations[] = $variation;
-            }
+//            }
 
             $product['color'] = $variations[0]['color'];
             $product['size'] = $variations[0]['size'];
@@ -150,11 +151,12 @@ class WooProducts {
                 $product['regular_price'] = $variations[0]['regular_price'];
             }
             
-            array_unshift($variations, $product);
+//            array_unshift($variations, $product);
 //            $variations[] = $product;
         }
 
-        return $variations;
+        return $product;
+//        return $variations;
     }
 
     public function getAllProducts() {

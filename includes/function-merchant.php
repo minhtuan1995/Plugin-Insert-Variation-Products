@@ -1,10 +1,10 @@
 <?php
 
 require_once( WC_PLUGIN_DIR . '/google-api/vendor/autoload.php' );
-//require_once('../google-api/vendor/autoload.php' );
+//require_once('/google-api/vendor/autoload.php' );
 
 if (!defined('MAX_PRODUCT_BATCH')) {
-    define('MAX_PRODUCT_BATCH', 200); 
+    define('MAX_PRODUCT_BATCH', 250); 
 }
 function function_merchant_feed_page() {
     
@@ -32,10 +32,14 @@ function function_merchant_feed_page() {
             $_SESSION['merchant_id'] = $_POST['merchant_id'];
             if (isset($_POST['start_product']) && $_POST['start_product'] != 0) {
                 $_SESSION['start_product'] = $_POST['start_product'];
+            } else {
+                unset($_SESSION['start_product']);
             }
 
             if (isset($_POST['end_product']) && $_POST['end_product'] != 0) {
                 $_SESSION['end_product'] = $_POST['end_product'];
+            } else {
+                unset($_SESSION['end_product']);
             }
         }
         
@@ -513,7 +517,7 @@ function iframe_feed_merchant_page() {
     $wooFeed = new WooProducts(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
 
     $products = $wooFeed->getAllProducts();
-
+    
     $countProduct = 0;
     $countBatch = 0;
     
@@ -537,7 +541,8 @@ function iframe_feed_merchant_page() {
         $t2 = microtime(true);
         $created_time = $created_time + $t2 - $t1;
         
-        foreach ($variations as $variation) {
+//        foreach ($variations as $variation) {
+        $variation = $variations;
             $countBatch++;
             
             $t1 = microtime(true);
@@ -558,24 +563,24 @@ function iframe_feed_merchant_page() {
                 $batch->setEntries($entries);
                 
                 $t1 = microtime(true);
-//                $batchResponse = $service->products->custombatch($batch);
-                $service->products->custombatch($batch);
+                $batchResponse = $service->products->custombatch($batch);
+//                $service->products->custombatch($batch);
                 $t2 = microtime(true);
                 $batch_time = $batch_time + $t2 - $t1;
                 
                 echo "REQUESTED " . $countBatch . "<br/>";
                 
-//                foreach ($batchResponse->entries as $entry) {
-//                    if (empty($entry->getErrors())) {
-//                        $product = $entry->getProduct();
-//                        printf("Inserted product: %s => Offer ID: %s with %d warnings<br/>", $product->getTitle(), $product->getOfferId(), count($product->getWarnings()));
-//                    } else {
-//                        print ("There were errors inserting a product:<br/>");
-//                        foreach ($entry->getErrors()->getErrors() as $error) {
-//                            printf("\t%s\n", $error->getMessage());
-//                        }
-//                    }
-//                }
+                foreach ($batchResponse->entries as $entry) {
+                    if (empty($entry->getErrors())) {
+                        $product = $entry->getProduct();
+                        printf("Inserted product: %s => Offer ID: %s with %d warnings<br/>", $product->getTitle(), $product->getOfferId(), count($product->getWarnings()));
+                    } else {
+                        print ("There were errors inserting a product:<br/>");
+                        foreach ($entry->getErrors()->getErrors() as $error) {
+                            printf("\t%s\n", $error->getMessage());
+                        }
+                    }
+                }
 
                 $entries = [];
 
@@ -583,35 +588,35 @@ function iframe_feed_merchant_page() {
                 flush();
                 usleep(2);
             }
-        }
+//        }
     }
 
     if (!empty($entries)) {
         // request everything
         $batch = new Google_Service_ShoppingContent_ProductsCustomBatchRequest();
         $batch->setEntries($entries);
-        $service->products->custombatch($batch);
-//        $batchResponse = $service->products->custombatch($batch);
+//        $service->products->custombatch($batch);
+        $batchResponse = $service->products->custombatch($batch);
         
         echo "REQUESTED " . $countBatch . "<br/>";
         
-//        foreach ($batchResponse->entries as $entry) {
-//            if (empty($entry->getErrors())) {
-//                $product = $entry->getProduct();
-//                printf("Inserted product: %s => Offer ID: %s with %d warnings<br/>", $product->getTitle(), $product->getOfferId(), count($product->getWarnings()));
-//            } else {
-//                print ("There were errors inserting a product:<br/>");
-//                foreach ($entry->getErrors()->getErrors() as $error) {
-//                    printf("\t%s\n", $error->getMessage());
-//                }
-//            }
-//        }
+        foreach ($batchResponse->entries as $entry) {
+            if (empty($entry->getErrors())) {
+                $product = $entry->getProduct();
+                printf("Inserted product: %s => Offer ID: %s with %d warnings<br/>", $product->getTitle(), $product->getOfferId(), count($product->getWarnings()));
+            } else {
+                print ("There were errors inserting a product:<br/>");
+                foreach ($entry->getErrors()->getErrors() as $error) {
+                    printf("\t%s\n", $error->getMessage());
+                }
+            }
+        }
     }
 
     $end_time = microtime(true);
     $time = $end_time - $start_time;
 
-    echo "Feed " . $countProduct . " products with " . $countBatch . " variations in " . number_format($time, 2) . "s <br/>";
+    echo "Feed " . $countProduct . " products in " . number_format($time, 2) . "s <br/>";
     echo "CREATE TIME: " . $created_time . " | CREATE FEED TIME: " . $created_feed_time . " | REQUEST TIME: " . $batch_time;
     echo "<br/>ALL DONE.";
 
@@ -631,25 +636,15 @@ function createProductFeed($product_raw) {
     $product->setTargetCountry('US');
     $product->setChannel('online');
     $product->setAvailability('in stock');
-    
+    $product->setAdditionalImageLinks($product_raw['additional_image_link']);
     $product->setCondition('new');
     $product->setGoogleProductCategory('Apparel & Accessories > Clothing');
     $product->setColor($product_raw['color']);
-
-//    $size_details = array (
-//      's'  => 'small',
-//        'm' => 'medium',
-//        'l' => 'large',
-//        'xl'    => 'large',
-//        'xxl'   => 'large',
-//        '3xl'   => 'large',
-//        '4xl'   => 'large',
-//    );
-
+    
     $product->setSizeSystem('US');
     $product->setSizeType('regular');
-    $product->setSizes(array(strtoupper($product_raw['size'])));
-    
+//    $product->setSizes(array(strtoupper($product_raw['size'])));
+    $product->setSizes(array('S','M','L','XL','XXL','3XL','4XL'));
     $product->setGender($product_raw['gender']);
 
     $product->setAdult(false);
