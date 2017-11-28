@@ -273,59 +273,64 @@ function iframe_shopify_feed_merchant_page() {
     ob_end_flush();
 }
 
-function createShopifyProductFeed($product_raw) {
+function createShopifyProductFeed($product, $link) {
 
-    $product = new Google_Service_ShoppingContent_Product();
+    $gProduct = new Google_Service_ShoppingContent_Product();
 
-    $product->setOfferId($product_raw['sku']);
-    $product->setTitle($product_raw['post_title']);
-    $product->setDescription(strip_tags($product_raw['description']));
-    $product->setLink($product_raw['link']);
-    $product->setImageLink($product_raw['image_link']);
-    $product->setContentLanguage('en');
-    $product->setTargetCountry('US');
-    $product->setChannel('online');
-    $product->setAvailability('in stock');
-    
-    $product->setCondition('new');
-    $product->setGoogleProductCategory('Apparel & Accessories > Clothing');
-    $product->setColor($product_raw['color']);
-
-//    $size_details = array (
-//      's'  => 'small',
-//        'm' => 'medium',
-//        'l' => 'large',
-//        'xl'    => 'large',
-//        'xxl'   => 'large',
-//        '3xl'   => 'large',
-//        '4xl'   => 'large',
-//    );
-
-    $product->setSizeSystem('US');
-    $product->setSizeType('regular');
-    $product->setSizes(array(strtoupper($product_raw['size'])));
-    
-    $product->setGender($product_raw['gender']);
-
-    $product->setAdult(false);
-
-    $product->setAgeGroup('adult');
-
-    $product->setBrand('Apparel');
-
-    if (isset($product_raw['sale_price'])) {
-        $sale_price = new Google_Service_ShoppingContent_Price();
-        $sale_price->setValue($product_raw['sale_price']);
-        $sale_price->setCurrency('USD');
+    if (isset($product['sku']) && !empty($product['sku'])) {
+        $_sku = $product['sku'];
+    } elseif (isset($product['handle']) && !empty($product['handle'])) {
+        $pos = strrpos($product['handle'], "-");
+        if ($pos!=false) {
+            $_sku = substr($product['handle'], $pos+1);
+        }
+    } else {
+        $_sku = $product['id'];
     }
+    
+    $gProduct->setOfferId($_sku);
+    $gProduct->setTitle($product['title']);
+    
+    $description = str_replace("\n", '', $product['body_html']);
+    $gProduct->setDescription(strip_tags($description));
+    
+    $product_link = $link . $product['handle'];
+    $gProduct->setLink($product_link);
+    
+    $product['image']['src'] = preg_replace('/\?.*/', '', $product['image']['src']);
+    $gProduct->setImageLink($product['image']['src']);
+    $gProduct->setContentLanguage('en');
+    $gProduct->setTargetCountry('US');
+    $gProduct->setChannel('online');
+    $gProduct->setAvailability('in stock');
+    
+    $gProduct->setCondition('new');
+    $gProduct->setGoogleProductCategory('Apparel & Accessories > Clothing');
+    //$gProduct->setColor($product['color']);
 
-    if (isset($product_raw['regular_price'])) {
+    $gProduct->setSizeSystem('US');
+    $gProduct->setSizeType('regular');
+    
+//    $gProduct->setSizes(array(strtoupper($product['size'])));
+    $gProduct->setSizes(array('S','M','L','XL','XXL','3XL','4XL'));
+    $gProduct->setGender('unisex');
+    $gProduct->setAdult(false);
+    $gProduct->setAgeGroup('Adult');
+    $gProduct->setBrand('Apparel');
+
+    $variant = $product['variants'][0];
+    
+    if (isset($variant['compare_at_price'])) {
+        $sale_price = new Google_Service_ShoppingContent_Price();
+        $sale_price->setValue($variant['price']);
+        $sale_price->setCurrency('USD');
+        
         $price = new Google_Service_ShoppingContent_Price();
-        $price->setValue($product_raw['regular_price']);
+        $price->setValue($variant['compare_at_price']);
         $price->setCurrency('USD');
     } else {
         $price = new Google_Service_ShoppingContent_Price();
-        $price->setValue($product_raw['price']);
+        $price->setValue($variant['price']);
         $price->setCurrency('USD');
     }
 
@@ -338,14 +343,25 @@ function createShopifyProductFeed($product_raw) {
     $shipping->setCountry('US');
     $shipping->setService('Standard shipping');
 
-    $product->setPrice($price);
+    $gProduct->setPrice($price);
     if (isset($sale_price)) {
-        $product->setSalePrice($sale_price);
+        $gProduct->setSalePrice($sale_price);
     }
 
-    $product->setShipping(array($shipping));
+    $gProduct->setShipping(array($shipping));
 
-    return $product;
+    
+    if (isset($product['images']) && count($product['images']) > 0) {
+        foreach ($product['images'] as $image) {
+            $images[] = preg_replace('/\?.*/', '', $image['src']);
+        }
+    }
+    
+    if (isset($images)) {
+        $gProduct->setAdditionalImageLinks($images);
+    }
+    
+    return $gProduct;
 }
 
 ?>

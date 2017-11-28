@@ -9,11 +9,11 @@
 //    
 //});
 
-jQuery(document).ready(function($) {
-//    console.log("START");
-    setTimeout(function ()
-    {
-        var $contents = $('#iframe-insert-variations').contents();
-        $contents.scrollTop($contents.height());
-    }, 1000); // ms = 3 sec
-});
+//jQuery(document).ready(function($) {
+////    console.log("START");
+//    setTimeout(function ()
+//    {
+//        var $contents = $('#iframe-insert-variations').contents();
+//        $contents.scrollTop($contents.height());
+//    }, 1000); // ms = 3 sec
+//});

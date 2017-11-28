@@ -10,6 +10,7 @@ require_once( WC_PLUGIN_DIR . 'google-api/vendor/autoload.php' );
 //require_once('../google-api/vendor/autoload.php' );
 
 require_once('function-merchant.php');
+require_once('function-merchant-shopify.php');
 require_once 'function-insert.php';
 require_once 'function-update.php';
 require_once 'jsonConvert.php';
