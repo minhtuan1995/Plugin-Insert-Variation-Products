@@ -21,8 +21,8 @@ if (!defined('WC_PLUGIN_URL')) {
     define('WC_PLUGIN_URL', plugin_dir_url(__FILE__));
 }
 
-define('MAX_PRODUCT_PAGE', 100);     // Number of product when process all products
-//define('MAX_PRODUCT_PAGE', 10);     // Number of product when process all products
+define('MAX_PRODUCT_PAGE', 10);     // Number of product when process all products
+//define('MAX_PRODUCT_PAGE', 250);     // Number of product when process all products
 //define('BATCH_SIZE', 25);
 
 if (!defined('MAX_PRODUCT_BATCH')) {
@@ -483,9 +483,9 @@ function iframe_shopify_feed_page() {
     }
     
 //    insert_variation_prepare();
-        if (ob_get_level() == 0)
+    if (ob_get_level() == 0) {
         ob_start();
-    
+    }
     // Calculated Time
     $time_all = microtime(true);
     $time_getShopify = 0;
@@ -526,8 +526,6 @@ function iframe_shopify_feed_page() {
     $service = new Google_Service_ShoppingContent($client);
     
     echo "OAUTH2 DONE.<br/>";
-
-    
 
     $input['shop_url'] = $_SESSION['shop_url'];
     $input['shop_api_key'] = $_SESSION['shop_api_key'];
@@ -577,11 +575,18 @@ function iframe_shopify_feed_page() {
         $t1 = microtime(true);
         $part_products = $shopifyClient->getProducts($parameters);
         $t2 = microtime(true);
-        $time_getShopify = $time_getShopify + $t2 - $t1;
+        $time_getShopify_1 = $t2 - $t1;
+        $time_getShopify = $time_getShopify + $time_getShopify_1;
         
         if ($part_products == false) {
             echo '<strong>Can not get products.</strong><br/>';
             exit;
+        } else {
+            echo '<strong>Get done ' . count($part_products['products']) . ' products in ' . number_format($time_getShopify_1, 2) . '</strong><br/>';
+            
+            ob_flush();
+            flush();
+            usleep(2);
         }
         
         foreach ($part_products['products'] as $product) {
@@ -614,8 +619,6 @@ function iframe_shopify_feed_page() {
                 $t2 = microtime(true);
                 $time_requestAPI = $time_requestAPI + $t2 - $t1;
 
-                echo "<strong>REQUESTED " . $countProduct . "<strong><br/>";
-
                 foreach ($batchResponse->entries as $entry) {
                     if (empty($entry->getErrors())) {
                         $product = $entry->getProduct();
@@ -628,6 +631,8 @@ function iframe_shopify_feed_page() {
                     }
                 }
 
+                echo "<strong>REQUESTED " . $countProduct . "<strong><br/>";
+                
                 $entries = [];
 
                 ob_flush();
@@ -648,8 +653,6 @@ function iframe_shopify_feed_page() {
         $t2 = microtime(true);
         $time_requestAPI = $time_requestAPI + $t2 - $t1;
         
-        echo "<strong>REQUESTED " . $countProduct . "<strong><br/>";
-        
         foreach ($batchResponse->entries as $entry) {
             if (empty($entry->getErrors())) {
                 $product = $entry->getProduct();
@@ -661,11 +664,14 @@ function iframe_shopify_feed_page() {
                 }
             }
         }
+        
+        echo "<strong>REQUESTED " . $countProduct . "<strong><br/>";
     }
     
     $end_time = microtime(true);
     $all_time = $end_time - $time_all;  
 
+    echo "############################# <br/>";
     echo "Feed " . $countProduct . " products in " . number_format($all_time, 2) . "s <br/>";
     echo "GET SHOPIFY PRODUCTS TIME: " . $time_getShopify . " | CREATE FEED TIME: " . $time_createFeed . " | REQUEST API TIME: " . $time_requestAPI;
     echo "<br/>ALL DONE.";

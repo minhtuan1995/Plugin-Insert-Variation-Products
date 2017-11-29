@@ -306,7 +306,7 @@ function createShopifyProductFeed($product, $link) {
     
     $gProduct->setCondition('new');
     $gProduct->setGoogleProductCategory('Apparel & Accessories > Clothing');
-    //$gProduct->setColor($product['color']);
+    $gProduct->setColor('Black');
 
     $gProduct->setSizeSystem('US');
     $gProduct->setSizeType('regular');

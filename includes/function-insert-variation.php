@@ -101,8 +101,9 @@ function insert_variation_prepare() {
     
     $wpdb->query( 'SET autocommit = 0;' );
     
-    if (ob_get_level() == 0)
+    if (ob_get_level() == 0) {
         ob_start();
+    }
 }
 
 function insert_variation_finish() {
