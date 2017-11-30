@@ -21,8 +21,8 @@ if (!defined('WC_PLUGIN_URL')) {
     define('WC_PLUGIN_URL', plugin_dir_url(__FILE__));
 }
 
-define('MAX_PRODUCT_PAGE', 100);     // Number of product when process all products
-//define('MAX_PRODUCT_PAGE', 250);     // Number of product when process all products
+//define('MAX_PRODUCT_PAGE', 100);     // Number of product when process all products
+define('MAX_PRODUCT_PAGE', 250);     // Number of product when process all products
 //define('BATCH_SIZE', 25);
 
 if (!defined('MAX_PRODUCT_BATCH')) {
@@ -482,10 +482,10 @@ function iframe_shopify_feed_page() {
         wp_die(__('You do not have sufficient permissions to access this page.'));
     }
     
-//    insert_variation_prepare();
-    if (ob_get_level() == 0) {
-        ob_start();
-    }
+    insert_variation_prepare();
+//    if (ob_get_level() == 0) {
+//        ob_start();
+//    }
     // Calculated Time
     $time_all = microtime(true);
     $time_getShopify = 0;
@@ -563,6 +563,16 @@ function iframe_shopify_feed_page() {
     $page_end = $_SESSION['end_product'] / MAX_PRODUCT_PAGE + 1;
     $page_end = (int) $page_end;
 
+    echo "Preparing the requests .... <br/>";
+    ob_flush();
+    flush();
+    usleep(2);
+    $t1 = microtime(true);
+    $shopifyClient->initCallProducts(MAX_PRODUCT_PAGE, $page_start, $page_end);
+    $t2 = microtime(true);
+    $t_init = $t2 - $t1;
+    echo "Init call to API DONE in " . number_format($t_init, 2) . 's <br/>';
+    
     $countProduct = 0;
 
     for ($i = $page_start; $i <= $page_end; $i++) {

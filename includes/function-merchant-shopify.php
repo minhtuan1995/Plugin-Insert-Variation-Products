@@ -126,152 +126,152 @@ function function_shopify_merchant_feed_page() {
     }
 }
 
-function iframe_shopify_feed_merchant_page() {
-    $client = new Google_Client();
-    //$client->setAuthConfig('client-secrets02.json');  
-    $client->setClientId($_SESSION['client_id']);
-    $client->setClientSecret($_SESSION['client_secret']);
-    $client->setRedirectUri($_SESSION['redirect_url']);      // redirect uri
-    $client->setScopes(Google_Service_ShoppingContent::CONTENT);
-
-    if (isset($_GET['logout'])) { // logout: destroy token
-        unset($_SESSION['token']);
-        die('Logged out.');
-    }
-
-    if (isset($_GET['code'])) { // we received the positive auth callback, get the token and store it in session
-        $client->authenticate($_GET['code']);
-        $_SESSION['token'] = $client->getAccessToken();
-    }
-
-    if (isset($_SESSION['token'])) { // extract token from session and configure client
-        $token = $_SESSION['token'];
-        $client->setAccessToken($token);
-    }
-
-    if (!$client->getAccessToken()) { // auth call to google
-        $authUrl = $client->createAuthUrl();
-        header("Location: " . $authUrl);
-        die;
-    }
-
-
-    echo '#<strong><font color="red"> START FEEDING...</font></strong><br/>';
-    ob_flush();
-    flush();
-    sleep(1);
-
-    $start_time = microtime(true);
-
-    $service = new Google_Service_ShoppingContent($client);
-
-    $wooFeed = new WooProducts(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
-
-    $products = $wooFeed->getAllProducts();
-
-    $countProduct = 0;
-    $countBatch = 0;
-    
-    $created_time = 0;
-    $created_feed_time = 0;
-    $batch_time = 0;
-    
-    
-
-    foreach ($products as $product) {
-        $countProduct++;
-        if (isset($_SESSION['start_product']) && $countProduct < $_SESSION['start_product']) {
-            continue;
-        }
-        if (isset($_SESSION['end_product']) && $countProduct > $_SESSION['end_product']) {
-            $countProduct = $_SESSION['end_product'] - $_SESSION['start_product'] + 1;
-            break;
-        }
-        $t1 = microtime(true);
-        $variations = $wooFeed->getAllVariations($product);
-        $t2 = microtime(true);
-        $created_time = $created_time + $t2 - $t1;
-        
-        foreach ($variations as $variation) {
-            $countBatch++;
-            
-            $t1 = microtime(true);
-            $postBody = createProductFeed($variation);
-            $t2 = microtime(true);
-            $created_feed_time = $created_feed_time + $t2 - $t1;
-            
-            $batchEntry = new Google_Service_ShoppingContent_ProductsCustomBatchRequestEntry();
-            $batchEntry->setBatchId($countBatch);
-            $batchEntry->setMerchantId($_SESSION['merchant_id']); //$merchantID is a string, it works for connection
-            $batchEntry->setMethod("insert");
-            $batchEntry->setProduct($postBody); //$postBody is a Google_Service_ShoppingContent_Product object
-            $batchEntry->setProductId($variation['sku']);
-            $entries[] = $batchEntry;
-
-            if ($countBatch % MAX_PRODUCT_BATCH == 0) {
-                $batch = new Google_Service_ShoppingContent_ProductsCustomBatchRequest();
-                $batch->setEntries($entries);
-                
-                $t1 = microtime(true);
-                $batchResponse = $service->products->custombatch($batch);
-                $service->products->custombatch($batch);
-                $t2 = microtime(true);
-                $batch_time = $batch_time + $t2 - $t1;
-                
-                echo "REQUESTED " . $countBatch . "<br/>";
-                
-//                foreach ($batchResponse->entries as $entry) {
-//                    if (empty($entry->getErrors())) {
-//                        $product = $entry->getProduct();
-//                        printf("Inserted product: %s => Offer ID: %s with %d warnings<br/>", $product->getTitle(), $product->getOfferId(), count($product->getWarnings()));
-//                    } else {
-//                        print ("There were errors inserting a product:<br/>");
-//                        foreach ($entry->getErrors()->getErrors() as $error) {
-//                            printf("\t%s\n", $error->getMessage());
-//                        }
-//                    }
-//                }
-
-                $entries = [];
-
-                ob_flush();
-                flush();
-                usleep(2);
-            }
-        }
-    }
-
-    if (!empty($entries)) {
-        // request everything
-        $batch = new Google_Service_ShoppingContent_ProductsCustomBatchRequest();
-        $batch->setEntries($entries);
-        $service->products->custombatch($batch);
-        $batchResponse = $service->products->custombatch($batch);
-        
-        echo "REQUESTED " . $countBatch . "<br/>";
-        
-//        foreach ($batchResponse->entries as $entry) {
-//            if (empty($entry->getErrors())) {
-//                $product = $entry->getProduct();
-//                printf("Inserted product: %s => Offer ID: %s with %d warnings<br/>", $product->getTitle(), $product->getOfferId(), count($product->getWarnings()));
-//            } else {
-//                print ("There were errors inserting a product:<br/>");
-//                foreach ($entry->getErrors()->getErrors() as $error) {
-//                    printf("\t%s\n", $error->getMessage());
-//                }
+//function iframe_shopify_feed_merchant_page() {
+//    $client = new Google_Client();
+//    //$client->setAuthConfig('client-secrets02.json');  
+//    $client->setClientId($_SESSION['client_id']);
+//    $client->setClientSecret($_SESSION['client_secret']);
+//    $client->setRedirectUri($_SESSION['redirect_url']);      // redirect uri
+//    $client->setScopes(Google_Service_ShoppingContent::CONTENT);
+//
+//    if (isset($_GET['logout'])) { // logout: destroy token
+//        unset($_SESSION['token']);
+//        die('Logged out.');
+//    }
+//
+//    if (isset($_GET['code'])) { // we received the positive auth callback, get the token and store it in session
+//        $client->authenticate($_GET['code']);
+//        $_SESSION['token'] = $client->getAccessToken();
+//    }
+//
+//    if (isset($_SESSION['token'])) { // extract token from session and configure client
+//        $token = $_SESSION['token'];
+//        $client->setAccessToken($token);
+//    }
+//
+//    if (!$client->getAccessToken()) { // auth call to google
+//        $authUrl = $client->createAuthUrl();
+//        header("Location: " . $authUrl);
+//        die;
+//    }
+//
+//
+//    echo '#<strong><font color="red"> START FEEDING...</font></strong><br/>';
+//    ob_flush();
+//    flush();
+//    sleep(1);
+//
+//    $start_time = microtime(true);
+//
+//    $service = new Google_Service_ShoppingContent($client);
+//
+//    $wooFeed = new WooProducts(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+//
+//    $products = $wooFeed->getAllProducts();
+//
+//    $countProduct = 0;
+//    $countBatch = 0;
+//    
+//    $created_time = 0;
+//    $created_feed_time = 0;
+//    $batch_time = 0;
+//    
+//    
+//
+//    foreach ($products as $product) {
+//        $countProduct++;
+//        if (isset($_SESSION['start_product']) && $countProduct < $_SESSION['start_product']) {
+//            continue;
+//        }
+//        if (isset($_SESSION['end_product']) && $countProduct > $_SESSION['end_product']) {
+//            $countProduct = $_SESSION['end_product'] - $_SESSION['start_product'] + 1;
+//            break;
+//        }
+//        $t1 = microtime(true);
+//        $variations = $wooFeed->getAllVariations($product);
+//        $t2 = microtime(true);
+//        $created_time = $created_time + $t2 - $t1;
+//        
+//        foreach ($variations as $variation) {
+//            $countBatch++;
+//            
+//            $t1 = microtime(true);
+//            $postBody = createProductFeed($variation);
+//            $t2 = microtime(true);
+//            $created_feed_time = $created_feed_time + $t2 - $t1;
+//            
+//            $batchEntry = new Google_Service_ShoppingContent_ProductsCustomBatchRequestEntry();
+//            $batchEntry->setBatchId($countBatch);
+//            $batchEntry->setMerchantId($_SESSION['merchant_id']); //$merchantID is a string, it works for connection
+//            $batchEntry->setMethod("insert");
+//            $batchEntry->setProduct($postBody); //$postBody is a Google_Service_ShoppingContent_Product object
+//            $batchEntry->setProductId($variation['sku']);
+//            $entries[] = $batchEntry;
+//
+//            if ($countBatch % MAX_PRODUCT_BATCH == 0) {
+//                $batch = new Google_Service_ShoppingContent_ProductsCustomBatchRequest();
+//                $batch->setEntries($entries);
+//                
+//                $t1 = microtime(true);
+//                $batchResponse = $service->products->custombatch($batch);
+//                $service->products->custombatch($batch);
+//                $t2 = microtime(true);
+//                $batch_time = $batch_time + $t2 - $t1;
+//                
+//                echo "REQUESTED " . $countBatch . "<br/>";
+//                
+////                foreach ($batchResponse->entries as $entry) {
+////                    if (empty($entry->getErrors())) {
+////                        $product = $entry->getProduct();
+////                        printf("Inserted product: %s => Offer ID: %s with %d warnings<br/>", $product->getTitle(), $product->getOfferId(), count($product->getWarnings()));
+////                    } else {
+////                        print ("There were errors inserting a product:<br/>");
+////                        foreach ($entry->getErrors()->getErrors() as $error) {
+////                            printf("\t%s\n", $error->getMessage());
+////                        }
+////                    }
+////                }
+//
+//                $entries = [];
+//
+//                ob_flush();
+//                flush();
+//                usleep(2);
 //            }
 //        }
-    }
-
-    $end_time = microtime(true);
-    $time = $end_time - $start_time;
-
-    echo "Feed " . $countProduct . " products with " . $countBatch . " variations in " . number_format($time, 2) . "s <br/>";
-    echo "CREATE TIME: " . $created_time . " | CREATE FEED TIME: " . $created_feed_time . " | REQUEST TIME: " . $batch_time;
-    echo "<br/>ALL DONE.";
-
-    ob_end_flush();
-}
+//    }
+//
+//    if (!empty($entries)) {
+//        // request everything
+//        $batch = new Google_Service_ShoppingContent_ProductsCustomBatchRequest();
+//        $batch->setEntries($entries);
+//        $service->products->custombatch($batch);
+//        $batchResponse = $service->products->custombatch($batch);
+//        
+//        echo "REQUESTED " . $countBatch . "<br/>";
+//        
+////        foreach ($batchResponse->entries as $entry) {
+////            if (empty($entry->getErrors())) {
+////                $product = $entry->getProduct();
+////                printf("Inserted product: %s => Offer ID: %s with %d warnings<br/>", $product->getTitle(), $product->getOfferId(), count($product->getWarnings()));
+////            } else {
+////                print ("There were errors inserting a product:<br/>");
+////                foreach ($entry->getErrors()->getErrors() as $error) {
+////                    printf("\t%s\n", $error->getMessage());
+////                }
+////            }
+////        }
+//    }
+//
+//    $end_time = microtime(true);
+//    $time = $end_time - $start_time;
+//
+//    echo "Feed " . $countProduct . " products with " . $countBatch . " variations in " . number_format($time, 2) . "s <br/>";
+//    echo "CREATE TIME: " . $created_time . " | CREATE FEED TIME: " . $created_feed_time . " | REQUEST TIME: " . $batch_time;
+//    echo "<br/>ALL DONE.";
+//
+//    ob_end_flush();
+//}
 
 function createShopifyProductFeed($product, $link) {
 
@@ -333,7 +333,12 @@ function createShopifyProductFeed($product, $link) {
         $price->setValue($variant['price']);
         $price->setCurrency('USD');
     }
-
+    
+    $gProduct->setPrice($price);
+    if (isset($sale_price)) {
+        $gProduct->setSalePrice($sale_price);
+    }
+    
     $shipping_price = new Google_Service_ShoppingContent_Price();
     $shipping_price->setValue('0.99');
     $shipping_price->setCurrency('USD');
@@ -343,14 +348,15 @@ function createShopifyProductFeed($product, $link) {
     $shipping->setCountry('US');
     $shipping->setService('Standard shipping');
 
-    $gProduct->setPrice($price);
-    if (isset($sale_price)) {
-        $gProduct->setSalePrice($sale_price);
-    }
-
     $gProduct->setShipping(array($shipping));
-
     
+    $tax_price = new Google_Service_ShoppingContent_ProductTax();
+    $tax_price->setRate('8.75');
+    $tax_price->setCountry('US');
+    $tax_price->setTaxShip(true);
+    
+    $gProduct->setTaxes(array($tax_price));
+
     if (isset($product['images']) && count($product['images']) > 0) {
         foreach ($product['images'] as $image) {
             $images[] = preg_replace('/\?.*/', '', $image['src']);

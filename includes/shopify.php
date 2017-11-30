@@ -23,6 +23,43 @@ class Shopify {
      * @param array Associative array of filters
      * @returns        An array of order data
      */
+    function initCallProducts($products, $start_page, $end_page) {
+        
+        $url = "https://" . "{$this->_apiKey}:{$this->_secret}@{$this->_storeURL}" .
+                "/admin/products.json";
+
+        // create cURLs resources
+        for ($i = $start_page; $i <= $end_page; $i++) {
+            
+            $url = "https://" . "{$this->_apiKey}:{$this->_secret}@{$this->_storeURL}" .
+                "/admin/products.json?limit=" . $products . '&page=' . $i;
+            
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_TIMEOUT_MS, 500);
+            curl_setopt($curl, CURLOPT_HEADER, 0);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_FORBID_REUSE, true);
+            curl_setopt($curl, CURLOPT_CONNECTTIMEOUT_MS, 500);
+            curl_setopt($curl, CURLOPT_DNS_CACHE_TIMEOUT, 10); 
+            curl_setopt($curl, CURLOPT_FRESH_CONNECT, true);
+
+            $data = curl_exec($curl);   
+
+//            echo $data;
+
+            curl_close($curl);
+        }
+
+        return true;
+    }
+    
+    /**
+     * Retrieve an array of orders.
+     *
+     * @param array Associative array of filters
+     * @returns        An array of order data
+     */
     function getProducts($filters = array()) {
         $filter[] = "";
         foreach ($filters as $key => $value) {

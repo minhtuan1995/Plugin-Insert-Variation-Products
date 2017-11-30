@@ -20,7 +20,7 @@ for ($i = 41; $i <= 60; $i++) {
     curl_setopt($curl, CURLOPT_HEADER, 0);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, false);
     curl_setopt($curl, CURLOPT_FORBID_REUSE, true);
-    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 1);
+    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT_MS, 1);
     curl_setopt($curl, CURLOPT_DNS_CACHE_TIMEOUT, 10); 
     curl_setopt($curl, CURLOPT_FRESH_CONNECT, true);
 
