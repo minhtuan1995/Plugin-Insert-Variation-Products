@@ -8,18 +8,21 @@ $parameters['page'] = 1;
 
 $t1 = microtime(true);
 
-$request = 'https://af4553f71a3f4a1c2d76d3d3fd3866f4:fcf13188c314da4bb8d7f6731bf29218@vcshopify2.myshopify.com/admin/products.json?limit=2&page=';
+$request = 'https://af4553f71a3f4a1c2d76d3d3fd3866f4:fcf13188c314da4bb8d7f6731bf29218@vcshopify2.myshopify.com/admin/products.json?limit=10&page=';
 
 
 $urls = [];
 // create both cURL resources
-for ($i = 1; $i <= 5; $i++) {
-    $urls[] = $request . $i;
+for ($k = 1; $k <= 20; $k++) {
+    $urls[] = $request . $k;
 }
 
 rolling_curl($urls);
 
+$t2 = microtime(true);
+$time = $t2 - $t1;
 
+echo "GET products in " . $time . '<br/>';
 
 
 function rolling_curl($urls, $callback = '', $custom_options = null) {

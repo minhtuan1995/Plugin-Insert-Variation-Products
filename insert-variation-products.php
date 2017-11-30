@@ -21,7 +21,7 @@ if (!defined('WC_PLUGIN_URL')) {
     define('WC_PLUGIN_URL', plugin_dir_url(__FILE__));
 }
 
-define('MAX_PRODUCT_PAGE', 10);     // Number of product when process all products
+define('MAX_PRODUCT_PAGE', 100);     // Number of product when process all products
 //define('MAX_PRODUCT_PAGE', 250);     // Number of product when process all products
 //define('BATCH_SIZE', 25);
 

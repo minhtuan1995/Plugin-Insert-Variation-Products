@@ -25,6 +25,10 @@ function function_insert_variation_products($all_products, $page_products = 0, $
     echo " => Getting " . $CountAll . " products.";
     echo "<br/> ==================== <br/>";
 
+    ob_flush();
+    flush();
+    usleep(2);
+    
     $starttime = microtime(true);
     
     foreach ($all_products as $single_product) {

@@ -8,50 +8,28 @@ $parameters['page'] = 1;
 
 $t1 = microtime(true);
 
-$request = 'https://af4553f71a3f4a1c2d76d3d3fd3866f4:fcf13188c314da4bb8d7f6731bf29218@vcshopify2.myshopify.com/admin/products.json?limit=2&page=';
+$request = 'https://af4553f71a3f4a1c2d76d3d3fd3866f4:fcf13188c314da4bb8d7f6731bf29218@vcshopify2.myshopify.com/admin/products.json?limit=100&page=';
 
 
-$chanel = [];
 // create both cURL resources
-for ($i = 1; $i <= 3; $i++) {
-    $ch = curl_init();
-    $rq = $request + $i;
-    curl_setopt($ch, CURLOPT_URL, $rq);
-    curl_setopt($ch, CURLOPT_HEADER, 0);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+for ($i = 41; $i <= 60; $i++) {
+    $curl = curl_init();
+    $link = $request . $i;
+    curl_setopt($curl, CURLOPT_URL, $link);
+    curl_setopt($curl, CURLOPT_TIMEOUT, 1);
+    curl_setopt($curl, CURLOPT_HEADER, 0);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, false);
+    curl_setopt($curl, CURLOPT_FORBID_REUSE, true);
+    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 1);
+    curl_setopt($curl, CURLOPT_DNS_CACHE_TIMEOUT, 10); 
+    curl_setopt($curl, CURLOPT_FRESH_CONNECT, true);
+
+    $data = curl_exec($curl);   
+
+    echo $data;
     
-    $chanel[] = $ch;
+    curl_close($curl);
 }
-
-//create the multiple cURL handle
-$mh = curl_multi_init();
-
-//add the two handles
-foreach ($chanel as $ch) {
-    curl_multi_add_handle($mh,$ch);
-}
-
-$active = null;
-//execute the handles
-do {
-    $mrc = curl_multi_exec($mh, $active);
-} while ($mrc == CURLM_CALL_MULTI_PERFORM);
-
-while ($active && $mrc == CURLM_OK) {
-    if (curl_multi_select($mh) != -1) {
-        do {
-            $mrc = curl_multi_exec($mh, $active);
-        } while ($mrc == CURLM_CALL_MULTI_PERFORM);
-    }
-}
-
-foreach ($chanel as $key => $ch) {
-    $r = curl_multi_getcontent($ch);
-    var_dump($r);
-    curl_multi_remove_handle($mh,$ch);
-}
-
-curl_multi_close($mh);
 
 $t2 = microtime(true);
 $time = $t2 - $t1;
