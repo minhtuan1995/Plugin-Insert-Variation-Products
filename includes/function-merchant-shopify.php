@@ -357,9 +357,15 @@ function createShopifyProductFeed($product, $link) {
     
     $gProduct->setTaxes(array($tax_price));
 
+    // Max = 10 to avoid Google API disapproved
+    $countImage = 0;
     if (isset($product['images']) && count($product['images']) > 0) {
         foreach ($product['images'] as $image) {
+            $countImage++;
             $images[] = preg_replace('/\?.*/', '', $image['src']);
+            if ($countImage == 10) {
+                break;
+            }
         }
     }
     

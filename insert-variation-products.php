@@ -412,13 +412,13 @@ function shopify_feed_main_page() {
         $current_link = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
 
         echo '<div class="row">
-                <div class="col-lg-6">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">Connect to Shopify</div>
+                <div class="col-lg-12">
+                    <div class="panel panel-default"> 
+                       <div class="panel-heading">Connect to Shopify</div>
                         <div class="panel-body">
                             <div class="row">
-                                <div class="col-lg-12">
-                                    <form role="form" method="post">
+                            <form role="form" method="post">
+                                    <div class="col-lg-8">
                                         <div class="form-group">
                                             <label>Link Shop</label>
                                             <input class="form-control" id="shop_url" name="shop_url" value="vcshopify2.myshopify.com">
@@ -464,8 +464,52 @@ function shopify_feed_main_page() {
                                         <input type="hidden" id="process_merchantFeed" name="process_merchantFeed">
                                         <button type="submit" class="btn btn-default">Go Feed</button>
                                         <button type="reset" class="btn btn-default">Reset</button>
-                                    </form>
-                                </div>
+                                   
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="form-group">
+                                            <label>Link Shop</label>
+                                            <input class="form-control" id="shop_url" name="shop_url" value="vcshopify2.myshopify.com">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>API Key</label>
+                                            <input class="form-control" id="shop_api_key" name="shop_api_key" value="af4553f71a3f4a1c2d76d3d3fd3866f4">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>API Secret</label>
+                                            <input class="form-control" id="shop_secret_key" name="shop_secret_key" value="fcf13188c314da4bb8d7f6731bf29218">
+                                        </div>
+                                        <div class="form-group hidden">
+                                            <label>Client ID</label>
+                                            <input class="form-control" id="client_id" name="client_id" value="379113138681-bd8fqdfa6tt5po3a1hjp9j607hajkt7q.apps.googleusercontent.com">
+                                        </div>
+                                            <div class="form-group hidden">
+                                            <label>Client Secret</label>
+                                            <input class="form-control" id="client_secret" name="client_secret" value="kRLliQ_aB66pcVyBRUr2Tllg">
+                                        </div>
+                                        <div class="form-group hidden">
+                                            <label>Redirect URL</label>
+                                            <input class="form-control" id="redirect_url" name="redirect_url" value="' . $current_link . '">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Merchant ID</label>
+                                            <input class="form-control" id="merchant_id" name="merchant_id" value="119488439">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Product URL</label>
+                                            <input class="form-control" id="product_url" name="product_url" value="https://vcshopify2.myshopify.com/products/">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Start Product</label>
+                                            <input class="form-control" id="start_product" name="start_product" value="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>End Product</label>
+                                            <input class="form-control" id="end_product" name="end_product" value="5">
+                                            <p class="help-block">Enter "0" to process all products.</p>
+                                        </div>
+                                    </div>
+                                 </form>
                             </div>
                         </div>
                     </div>

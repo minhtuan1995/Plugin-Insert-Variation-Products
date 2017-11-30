@@ -673,17 +673,24 @@ function createProductFeed($product_raw) {
     $shipping_price->setValue('0.99');
     $shipping_price->setCurrency('USD');
 
+    $product->setPrice($price);
+    if (isset($sale_price)) {
+        $product->setSalePrice($sale_price);
+    }
+    
     $shipping = new Google_Service_ShoppingContent_ProductShipping();
     $shipping->setPrice($shipping_price);
     $shipping->setCountry('US');
     $shipping->setService('Standard shipping');
 
-    $product->setPrice($price);
-    if (isset($sale_price)) {
-        $product->setSalePrice($sale_price);
-    }
-
     $product->setShipping(array($shipping));
+    
+    $tax_price = new Google_Service_ShoppingContent_ProductTax();
+    $tax_price->setRate('8.75');
+    $tax_price->setCountry('US');
+    $tax_price->setTaxShip(true);
+    
+    $product->setTaxes(array($tax_price));    
 
     return $product;
 }
