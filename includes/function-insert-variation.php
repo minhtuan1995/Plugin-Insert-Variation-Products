@@ -3,34 +3,15 @@
 /*
  * MAIN FUNCTION - Create products
  */
-function function_insert_variation_products($all_products, $page_products = 0, $page_end = 0) {
-    
-    $CountProcessed = 0;
-    $CountAll = count($all_products);
-    
-    echo "<br/> ####################### <br/>";
-    if ($page_products != 0) {
-        echo '#<strong><font color="red"> START IMPORT PART '. $page_products . '/' . $page_end . ': From product ' . MAX_PRODUCT_PAGE*($page_products-1) . ' to ' . MAX_PRODUCT_PAGE*$page_products . '</font></strong>';
-    } else {
-        echo '#<strong><font color="red"> START IMPORTING...</font></strong>';
-    }
-    echo "<br/> ####################### <br/>";
-    
-    echo " => Getting " . $CountAll . " products.";
-    echo "<br/> ==================== <br/>";
-
-    ob_flush();
-    flush();
-    usleep(2);
-    
-    $starttime = microtime(true);
+function function_insert_variation_products($all_products, $countProduct = 0, $total_product) {
     
     foreach ($all_products as $single_product) {
+        $countProduct++;
         // START - Process single product
         $t1 = microtime(true);
 
         $product_data = jsonConvert($single_product);
-        echo 'Importing: ' . $product_data['name'] . '<br/>';
+        echo 'Importing: <strong><font color="blue">' . $product_data['sku'] . '</font></strong> | ' . $product_data['name'] . '<br/>';
         
         //Update product if exists
         $productId = wc_get_product_id_by_sku($product_data['sku']);
@@ -56,32 +37,25 @@ function function_insert_variation_products($all_products, $page_products = 0, $
                 echo "<pre>";
             }
         }
-        $CountProcessed++;
+        
         $t2 = microtime(true);
         $t3 = $t2 - $t1;
-        echo "Done " . $CountProcessed . "/" . $CountAll . " | ";
+        echo "Done " . $countProduct . "/" . $total_product . " | ";
         echo " Time: " . number_format($t3, 3) . "s";
         echo "<br/> ==================== <br/>";
 
-        if ($CountProcessed % 3 == 0) {
+        if ($countProduct % 3 == 0) {
             ob_flush();
             flush();
             usleep(2);
         }
+        if ($countProduct >= $total_product) {
+            return $countProduct;
+        }
         // END - Process single product
     }
-
-    $endtime = microtime(true);
-    $timediff = $endtime - $starttime;
-    echo "<br/> All time: <strong>" . number_format($timediff, 3) . "s</strong>";
     
-    if ($page_products != 0) {
-        echo '<br/> <font color="green">IMPORT PART ' . $page_products . '/' . $page_end . ' PROCESSING: <strong>PAGE DONE</strong></font><br/>';
-        
-    } else {
-        echo '<br/> <font color="green">IMPORT PROCESSING: <strong>DONE</strong></font><br/>';
-    }
-    
+    return $countProduct;
 }
 
 function insert_variation_prepare() {

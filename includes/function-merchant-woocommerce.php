@@ -30,17 +30,11 @@ function function_woocommerce_merchant_feed_page() {
             $_SESSION['client_secret'] = $_POST['client_secret'];
             $_SESSION['redirect_url'] = $_POST['redirect_url'];
             $_SESSION['merchant_id'] = $_POST['merchant_id'];
-            if (isset($_POST['start_product']) && $_POST['start_product'] != 0) {
-                $_SESSION['start_product'] = $_POST['start_product'];
-            } else {
-                unset($_SESSION['start_product']);
-            }
-
-            if (isset($_POST['end_product']) && $_POST['end_product'] != 0) {
-                $_SESSION['end_product'] = $_POST['end_product'];
-            } else {
-                unset($_SESSION['end_product']);
-            }
+            $_SESSION['start_product'] = $_POST['start_product'];
+            $_SESSION['end_product'] = $_POST['end_product'];
+            
+            $_SESSION['shipping_price'] = $_POST['shipping_price'];
+            $_SESSION['shipping_service'] = $_POST['shipping_service'];
         }
         
         $client = new Google_Client();
@@ -101,16 +95,24 @@ function function_woocommerce_merchant_feed_page() {
                                         </div>
                                         <div class="form-group">
                                             <label>Merchant ID</label>
-                                            <input class="form-control" id="merchant_id" name="merchant_id" value="119062116">
+                                            <input type="number" class="form-control" id="merchant_id" name="merchant_id" value="119062116" required>
                                         </div>
-                                        <div class="form-group">
+                                        <div class="form-group" hidden>
                                             <label>Start Product</label>
-                                            <input class="form-control" id="start_product" name="start_product" value="1">
+                                            <input type="number" class="form-control" id="start_product" name="start_product" value="1" required>
                                         </div>
                                         <div class="form-group">
-                                            <label>End Product</label>
-                                            <input class="form-control" id="end_product" name="end_product" value="1">
+                                            <label>Product Limit</label>
+                                            <input type="number" class="form-control" id="end_product" name="end_product" value="1" required>
                                             <p class="help-block">Enter "0" to process all products.</p>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Shipping Price</label>
+                                            <input type="number" class="form-control" id="shipping_price" name="shipping_price" value="0.99" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Shipping Service</label>
+                                            <input type="text" class="form-control" id="shipping_service" name="shipping_service" value="Standard Shipping" required>
                                         </div>
 
                                         <input type="hidden" id="process_OauthGoogle" name="process_OauthGoogle">
@@ -155,7 +157,11 @@ function iframe_feed_merchant_page() {
         die;
     }
 
-    echo '#<strong><font color="red"> START FEEDING...</font></strong><br/>';
+    // Get Shipping Information
+    $shipping['shipping_price'] = $_SESSION['shipping_price'];
+    $shipping['shipping_service'] = $_SESSION['shipping_service'];
+    
+    echo '<br/>#<strong><font color="red"> START FEEDING...</font></strong><br/>';
     ob_flush();
     flush();
     sleep(1);
@@ -168,10 +174,13 @@ function iframe_feed_merchant_page() {
 
     $products = $wooFeed->getAllProducts();
     
+    // Numbers of products need to process
+    $all_products = $_SESSION['end_product'] - $_SESSION['start_product'] + 1;;
+    
     $countProduct = 0;
     $countBatch = 0;
     
-    $created_time = 0;
+    $get_products_time = 0;
     $created_feed_time = 0;
     $batch_time = 0;
     
@@ -187,14 +196,14 @@ function iframe_feed_merchant_page() {
         $t1 = microtime(true);
         $variations = $wooFeed->getAllVariations($product);
         $t2 = microtime(true);
-        $created_time = $created_time + $t2 - $t1;
+        $get_products_time = $get_products_time + $t2 - $t1;
         
 //        foreach ($variations as $variation) {
         $variation = $variations;
             $countBatch++;
             
             $t1 = microtime(true);
-            $postBody = createProductFeed($variation);
+            $postBody = createProductFeed($variation, $shipping);
             $t2 = microtime(true);
             $created_feed_time = $created_feed_time + $t2 - $t1;
             
@@ -218,12 +227,10 @@ function iframe_feed_merchant_page() {
                 $t2 = microtime(true);
                 $batch_time = $batch_time + $t2 - $t1;
                 
-                echo "REQUESTED " . $countBatch . "<br/>";
-                
                 foreach ($batchResponse->entries as $entry) {
                     if (empty($entry->getErrors())) {
                         $product = $entry->getProduct();
-                        printf("Inserted product: %s => Offer ID: %s with %d warnings<br/>", $product->getTitle(), $product->getOfferId(), count($product->getWarnings()));
+                        printf('Inserted product: <strong><font color="blue"> %s </font></strong> | %s => %d warnings<br/>', $product->getOfferId(), $product->getTitle() , count($product->getWarnings()));
                     } else {
                         print ("There were errors inserting a product:<br/>");
                         foreach ($entry->getErrors()->getErrors() as $error) {
@@ -231,6 +238,8 @@ function iframe_feed_merchant_page() {
                         }
                     }
                 }
+                
+                echo '<strong><font color="green">REQUESTED ' . $countBatch . '/' . $all_products . '</font></strong><br/>';
 
                 $entries = [];
 
@@ -248,12 +257,10 @@ function iframe_feed_merchant_page() {
 //        $service->products->custombatch($batch);
         $batchResponse = $service->products->custombatch($batch);
         
-        echo "REQUESTED " . $countBatch . "<br/>";
-        
         foreach ($batchResponse->entries as $entry) {
             if (empty($entry->getErrors())) {
                 $product = $entry->getProduct();
-                printf("Inserted product: %s => Offer ID: %s with %d warnings<br/>", $product->getTitle(), $product->getOfferId(), count($product->getWarnings()));
+                printf('Inserted product: <strong><font color="blue"> %s </font></strong> | %s => %d warnings<br/>', $product->getOfferId(), $product->getTitle() , count($product->getWarnings()));
             } else {
                 print ("There were errors inserting a product:<br/>");
                 foreach ($entry->getErrors()->getErrors() as $error) {
@@ -261,19 +268,22 @@ function iframe_feed_merchant_page() {
                 }
             }
         }
+        
+        echo '<strong><font color="green">FINAL REQUESTED ' . $countBatch . '/' . $all_products . '</font></strong><br/>';
     }
 
     $end_time = microtime(true);
     $time = $end_time - $start_time;
 
-    echo "Feed " . $countProduct . " products in " . number_format($time, 2) . "s <br/>";
-    echo "CREATE TIME: " . $created_time . " | CREATE FEED TIME: " . $created_feed_time . " | REQUEST TIME: " . $batch_time;
-    echo "<br/>ALL DONE.";
+    echo '########################<br/>';
+    echo '<strong><font color="blue"> FEED ' . $countProduct . ' PRODUCTS IN ' . number_format($time, 2) . 's</font></strong><br/>';
+    echo "Get Products Time: " . $get_products_time . " | Create Feed Time: " . $created_feed_time . " | Request Time: " . $batch_time . '<br/>';
+    echo '<strong><font color="green">ALL DONE.</font></strong>';
 
     ob_end_flush();
 }
 
-function createProductFeed($product_raw, $shipping) {
+function createProductFeed($product_raw, $shipping='') {
 
     $product = new Google_Service_ShoppingContent_Product();
 

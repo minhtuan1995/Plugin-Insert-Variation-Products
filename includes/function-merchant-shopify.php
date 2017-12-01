@@ -38,17 +38,9 @@ function shopify_feed_main_page() {
             $_SESSION['shipping_price'] = $_POST['shipping_price'];
             $_SESSION['shipping_service'] = $_POST['shipping_service'];
             
-            if (isset($_POST['start_product']) && $_POST['start_product'] != 0) {
-                $_SESSION['start_product'] = $_POST['start_product'];
-            } else {
-                $_SESSION['start_product'] = 0;
-            }
-
-            if (isset($_POST['end_product']) && $_POST['end_product'] != 0) {
-                $_SESSION['end_product'] = $_POST['end_product'];
-            } else {
-                $_SESSION['end_product'] = 0;
-            }
+            $_SESSION['start_product'] = $_POST['start_product'];
+            $_SESSION['end_product'] = $_POST['end_product'];
+            
         }
 
         $client = new Google_Client();
@@ -93,11 +85,11 @@ function shopify_feed_main_page() {
                     <div class="col-lg-6">
                         <div class="form-group">
                             <label>Shop ID</label>
-                            <input class="form-control" id="shop_url" name="shop_url" value="vcshopify2.myshopify.com">
+                            <input class="form-control" id="shop_url" name="shop_url" value="vcshopify2.myshopify.com" required>
                         </div>
                         <div class="form-group">
                             <label>Shop Domain</label>
-                            <input class="form-control" id="shop_domain" name="shop_domain" value="https://vcshopify2.myshopify.com">
+                            <input class="form-control" id="shop_domain" name="shop_domain" value="https://vcshopify2.myshopify.com" required>
                         </div>
                         
                         <div class="form-group hidden">
@@ -114,16 +106,16 @@ function shopify_feed_main_page() {
                         </div>
                         <div class="form-group">
                             <label>Merchant ID</label>
-                            <input class="form-control" id="merchant_id" name="merchant_id" value="119488439">
+                            <input type="number" class="form-control" id="merchant_id" name="merchant_id" value="119488439" required>
                         </div>
                         
                         <div class="form-group hidden">
                             <label>Start Product</label>
-                            <input class="form-control" id="start_product" name="start_product" value="0">
+                            <input type="number" class="form-control" id="start_product" name="start_product" value="0" required>
                         </div>
                         <div class="form-group">
                             <label>Product Limit</label>
-                            <input class="form-control" id="end_product" name="end_product" value="5">
+                            <input type="number" class="form-control" id="end_product" name="end_product" value="5" required>
                             <p class="help-block">Enter "0" to process all products.</p>
                         </div>
 
@@ -137,27 +129,27 @@ function shopify_feed_main_page() {
                     <div class="col-lg-5">
                         <div class="form-group">
                             <label>API Key</label>
-                            <input class="form-control" id="shop_api_key" name="shop_api_key" value="af4553f71a3f4a1c2d76d3d3fd3866f4">
+                            <input class="form-control" id="shop_api_key" name="shop_api_key" value="af4553f71a3f4a1c2d76d3d3fd3866f4" required>
                         </div>
                         <div class="form-group">
                             <label>API Secret</label>
-                            <input class="form-control" id="shop_secret_key" name="shop_secret_key" value="fcf13188c314da4bb8d7f6731bf29218">
+                            <input class="form-control" id="shop_secret_key" name="shop_secret_key" value="fcf13188c314da4bb8d7f6731bf29218" required>
                         </div>
                         <div class="form-group">
                             <label>Shipping Price</label>
-                            <input class="form-control" id="shipping_price" name="shipping_price" value="0.99">
+                            <input type="number" class="form-control" id="shipping_price" name="shipping_price" value="0.99" required>
                         </div>
                         <div class="form-group hidden">
                             <label>Shipping Currency</label>
-                            <input class="form-control" id="shipping_currency" name="shipping_currency" value="USD">
+                            <input class="form-control" id="shipping_currency" name="shipping_currency" value="USD" required>
                         </div>
                         <div class="form-group" hidden>
                             <label>Shipping Country</label>
-                            <input class="form-control" id="shipping_country" name="shipping_country" value="US">
+                            <input class="form-control" id="shipping_country" name="shipping_country" value="US" required>
                         </div>
                         <div class="form-group">
                             <label>Shipping Service</label>
-                            <input class="form-control" id="shipping_service" name="shipping_service" value="Standard Shipping">
+                            <input class="form-control" id="shipping_service" name="shipping_service" value="Standard Shipping" required>
                         </div>
                     </div>
                  </form>
@@ -375,9 +367,9 @@ function iframe_shopify_feed_page() {
     $all_time = $end_time - $time_all;  
 
     echo "############################# <br/>";
-    echo "Feed " . $countProduct . " products in " . number_format($all_time, 2) . "s <br/>";
-    echo "GET SHOPIFY PRODUCTS TIME: " . $time_getShopify . " | CREATE FEED TIME: " . $time_createFeed . " | REQUEST API TIME: " . $time_requestAPI;
-    echo "<br/>ALL DONE.";
+    echo '<strong><font color="blue">FEED ' . $countProduct . ' PRODUCTS IN ' . number_format($all_time, 2) . 's </font></strong><br/>';
+    echo 'Get Shopify Product Time: ' . number_format($time_getShopify, 2) . ' | Create Feed Time: ' . number_format($time_createFeed, 2) . ' | Request API Time: ' . number_format($time_requestAPI, 2) . '<br/>';
+    echo '<strong><font color="green">ALL DONE.</font></strong>"';
     
     ob_end_flush();
 }

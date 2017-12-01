@@ -46,8 +46,6 @@ class Shopify {
 
             $data = curl_exec($curl);   
 
-//            echo $data;
-
             curl_close($curl);
         }
 

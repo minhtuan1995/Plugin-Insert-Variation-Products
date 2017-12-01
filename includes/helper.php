@@ -11,6 +11,9 @@ function prefix_enqueue() {
     wp_register_script('prefix_bootstrap', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js');
     wp_enqueue_script('prefix_bootstrap');
     
+//    wp_register_script('jquery_validate', '//cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.min.js');
+//    wp_enqueue_script('jquery_validate');
+    
     wp_enqueue_script('my-styles', WC_PLUGIN_URL . 'assets/insert_variation_main.js' );
     
     // CSS
@@ -41,16 +44,12 @@ function create_iframe($iframe_function, $header, $task = '') {
                   <div class="panel-heading">' . $header . '</div>
                   <div class="panel-body">
                      <div class="row">
-                        <form role="form" method="post" action="admin.php?page=tool-options">
                            <div style="overflow: hidden; margin-left: 15px; margin-bottom: 15px; max-width: 150%;">
                               <iframe id="iframe-mt" class="iframe-mt" scrolling="yes" src="admin.php?page='. $iframe_function .'" style="border: 0px none; margin-left: -160px; height: 500px; margin-top: -50px; margin-bottom: -50px; width: 1180px;"> 
                               </iframe>
                            </div>
-                           <input type="hidden" id="process_clearSession" name="process_clearSession">
-                           <button type="submit" class="btn btn-danger" style="margin-left: 20px;">Clear Session</button>
                            <button id="iframe_sroll_up" name="iframe_sroll_up" class="btn btn-default" style="margin-left: 20px;">Sroll Up</button>
                            <button id="iframe_sroll_down" name="iframe_sroll_down" class="btn btn btn-info" style="margin-left: 20px;">Sroll Down</button>
-                           <p class="help-block" style="margin-left: 20px;">Clear Session to get another oauth2 if you get errors.</p>
                         </form>
                      </div>
                   </div>
