@@ -9,11 +9,16 @@
 //    
 //});
 
-//jQuery(document).ready(function($) {
-////    console.log("START");
-//    setTimeout(function ()
-//    {
-//        var $contents = $('#iframe-insert-variations').contents();
-//        $contents.scrollTop($contents.height());
-//    }, 1000); // ms = 3 sec
-//});
+jQuery(document).ready(function($) {
+    
+    $("#iframe_sroll_up").click(function(){
+    var $contents = $('#iframe-mt').contents();
+    $contents.scrollTop(0);
+    });
+
+    $("#iframe_sroll_down").click(function(){
+        var $contents = $('#iframe-mt').contents();
+        $contents.scrollTop($contents.height());
+    });
+});
+

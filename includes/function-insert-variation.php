@@ -4,12 +4,6 @@
  * MAIN FUNCTION - Create products
  */
 function function_insert_variation_products($all_products, $page_products = 0, $page_end = 0) {
-//    global $wpdb;
-//    wp_defer_term_counting( true );
-//    wp_defer_comment_counting( true );
-//    define( 'WP_IMPORTING', true );
-//    $wpdb->query( 'SET autocommit = 0;' );
-    
     
     $CountProcessed = 0;
     $CountAll = count($all_products);
@@ -88,10 +82,6 @@ function function_insert_variation_products($all_products, $page_products = 0, $
         echo '<br/> <font color="green">IMPORT PROCESSING: <strong>DONE</strong></font><br/>';
     }
     
-//    ob_end_flush();
-//    wp_defer_term_counting( false );
-//    wp_defer_comment_counting( false );
-//    $wpdb->query( 'COMMIT;' );
 }
 
 function insert_variation_prepare() {

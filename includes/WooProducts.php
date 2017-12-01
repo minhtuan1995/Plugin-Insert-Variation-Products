@@ -10,18 +10,6 @@ define('ATTRIBUTE_TYPE', 'attribute_pa_product-type');
 define('ATTRIBUTE_SIZE', 'attribute_pa_size');
 define('ATTRIBUTE_COLOR', 'attribute_pa_color');
 
-//$wooFeed = new WooProducts('localhost', 'root', '', 'wooconvert');
-//
-//$products = $wooFeed->getAllProducts();
-//
-//foreach ($products as $product) {
-//    $variations = $wooFeed->getAllVariations($products[0]);
-//    echo '<pre>';
-//    print_r($variations);
-//    echo '</pre>';
-//}
-
-
 class WooProducts {
 
     private $link;
@@ -53,8 +41,13 @@ class WooProducts {
                     break;
                 case '_product_image_gallery':
                     $images = explode(",", $meta['meta_value']);
+                    $countImages = 0;
                     if (is_array($images)) {
                         foreach ($images as $image) {
+                            $countImages++;
+                            if ($countImages > 10) {
+                                break;
+                            }
                             $_product['additional_image_link'][] = $this->getThumbImageLink($image);
                         }
                     }
