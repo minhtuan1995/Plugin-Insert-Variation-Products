@@ -174,8 +174,17 @@ function iframe_feed_merchant_page() {
 
     $products = $wooFeed->getAllProducts();
     
-    // Numbers of products need to process
-    $all_products = $_SESSION['end_product'] - $_SESSION['start_product'] + 1;;
+        // Don't have product id = 0
+    if ($_SESSION['start_product'] == 0) {
+        $_SESSION['start_product'] = 1;
+    }
+    
+    if ($_SESSION['end_product'] == 0) {
+        $all_products = count($products);
+        $_SESSION['end_product'] = $all_products;
+    } else {
+        $all_products = $_SESSION['end_product'] - $_SESSION['start_product'] + 1;
+    }
     
     $countProduct = 0;
     $countBatch = 0;
