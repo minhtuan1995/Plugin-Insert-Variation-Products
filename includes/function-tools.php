@@ -6,6 +6,73 @@
  * and open the template in the editor.
  */
 
+function tool_option_page() {
+
+    prefix_enqueue();
+
+    $current_link = (isset($_SERVER['HTTPS']) ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[SCRIPT_NAME]";
+
+    echo '';
+
+    echo '<div class="wrap">
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Google Merchant Manager Tools  
+                        </div>
+                        <div class="panel-body">';
+
+    if (isset($_POST['process_clearSession'])) {
+        
+        session_unset();
+        session_destroy();
+        
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        echo '  <div class="alert alert-success">
+                    <strong>The SESSION has been deleted. Go continue your job.</strong>
+                </div>';
+        echo '  </div></div></div></div></div>';
+        
+    } else {
+
+        echo '  <form method="POST" action="' . $current_link . '?page=delete-single-merchant-product">
+                    <p>
+                        <button type="submit" class="btn btn-warning btn-lg btn-block">
+                            Delete Single Merchant Product
+                        </button>
+                    </p>
+                </form>
+                <form method="POST" action="' . $current_link . '?page=delete-all-merchant-products">
+                    <p>
+                        <button type="submit" class="btn btn-danger btn-lg btn-block">
+                            Delete All Merchant Products
+                        </button>
+                    </p>
+                </form>
+            </div>
+            </div>
+    
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            The Other Tools
+        </div>
+        <div class="panel-body">
+            <form method="POST">
+                <p>Use this to clear the session and get another Oauth2.</p>
+                <input type="hidden" id="process_clearSession" name="process_clearSession">
+                <p><button type="submit" class="btn btn-primary btn-lg btn-block">Clear Session</button></p>
+            </form>
+        </div>
+        </div>
+        </div>
+    </div>';
+    }
+}
+
 function delete_all_merchant_products() {
     
     if (session_status() == PHP_SESSION_NONE) {
