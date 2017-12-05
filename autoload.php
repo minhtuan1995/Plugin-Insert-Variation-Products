@@ -32,4 +32,5 @@ require_once 'includes/shopify.php';
 require_once 'includes/helper.php';
 require_once('includes/WooProducts.php');
 require_once('includes/admin-menus.php');
+require_once('includes/Redirection.php');
 

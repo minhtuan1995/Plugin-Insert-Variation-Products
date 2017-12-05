@@ -12,6 +12,8 @@ function woocommerce_tools_admin_menu() {
     add_submenu_page('variation-products-main', __('Woo Converter'), __('Woo Converter'), 'manage_options', 'variation-products-main');
     add_submenu_page('variation-products-main', __('Woo Feed'), __('Woo Feed'), 'manage_options', 'function-woocommerce-feed', 'function_woocommerce_merchant_feed_page');
     add_submenu_page('variation-products-main', __('Shopify Feed'), __('Shopify Feed'), 'manage_options', 'function-shopify-feed', 'shopify_feed_main_page');
+    
+    add_submenu_page('variation-products-main', __('Test Function'), __('Test Function'), 'manage_options', 'function_insert_test_page', 'function_insert_test_page');
     add_submenu_page('variation-products-main', __('Redirection'), __('Redirection'), 'manage_options', 'function-redirection', 'function_redirection_page');
 // Tools
     add_submenu_page('variation-products-main', __('Tool Options'), __('Tool Options'), 'manage_options', 'tool-options', 'tool_option_page');
