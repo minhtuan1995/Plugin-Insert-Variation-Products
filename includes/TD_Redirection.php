@@ -16,16 +16,21 @@
 //}
 
 if (!defined('REDIRECTION_SOURCE')) {
-    define('REDIRECTION_SOURCE', 'http://shoppingstore02.ga');
+    define('REDIRECTION_SOURCE', 'shoppingstore02.ga');
 }
 
-if (!class_exists( 'Redirection' ) ) {
-    class Redirection {
+if (!class_exists( 'TD_Redirection' ) ) {
+    class TD_Redirection {
+        
         function __construct() {
             add_action('redirection_check', array(&$this, 'redirection_check_redirection'));
         }
 
-        function redirection_check_redirection($post_id = '', $source = '') {
+        function redirection_check_redirection($post_id = '', $store_id = '', $source = '') {
+
+            if (empty($post_id)) {
+                $post_id = get_the_ID();
+            }
             
             if ($source == '') {
                 $source = REDIRECTION_SOURCE;
@@ -42,6 +47,8 @@ if (!class_exists( 'Redirection' ) ) {
                     }
                     
                 }
+            } else {
+                echo '<meta name="plugin" content="TD_Redirection">';
             }
             
         }
@@ -55,7 +62,7 @@ if (!class_exists( 'Redirection' ) ) {
         public function redirection_by_post_id($post_id = '') {
             if (!empty($post_id)) {
 
-                $redirect_url = get_post_meta($post_id, '_redirect_url', TRUE);
+                $redirect_url = get_post_meta($post_id, '_redirection_url', TRUE);
 
                 if ($redirect_url) {
                     echo '<meta http-equiv="refresh" content="0; url=' . $redirect_url . '">';
@@ -66,6 +73,6 @@ if (!class_exists( 'Redirection' ) ) {
     }
 }
 
-if (class_exists( 'Redirection' )) {
-    $MyRedirection = new Redirection();
+if (class_exists( 'TD_Redirection' )) {
+    $MyRedirection = new TD_Redirection();
 }

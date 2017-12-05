@@ -25,7 +25,6 @@ require_once('autoload.php');
 require_once('includes/helper.php');
 
 add_action('plugins_loaded', 'woocommerce_tools_plugin_init');
-add_action( 'init', 'create_post_type_redirection' );
 
 function woocommerce_tools_plugin_init() {
     add_action('admin_menu', 'woocommerce_tools_admin_menu');
@@ -58,56 +57,100 @@ function function_insert_test_page() {
     echo "INSERT TEST DONE";
 }
 
-function create_post_type_redirection() {
-    register_post_type( 'movies',
-    // CPT Options
-        array(
-            'labels' => array(
-                'name' => __( 'Movies' ),
-                'singular_name' => __( 'Movie' )
-            ),
-            'public' => true,
-            'has_archive' => true,
-            'rewrite' => array('slug' => 'movies'),
-        )
-    );
-// Hooking up our function to theme setup
-}
-
 function function_redirection_page() {
     
     load_assets_redirection();
+    
+    $dbModel = new DbModel(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
     
     echo '<div class="wrap">';
     echo '<div class="row">
                 <div class="col-lg-6">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            <strong>Redirection:</strong> Add new redirection
+                            <strong><font color="blue">COUPON Redirection</font></strong>
                         </div>
                         <div class="panel-body">';
                         
+    if (isset($_POST['process_addNewCouponRedirection'])) {
+        
+        $string_add = "Added";
+        if ( !add_post_meta($_POST['post_id'], '_redirection_url', $_POST['redirect_url'], TRUE) ) {
+            $string_add = "Updated";
+            update_post_meta($_POST['post_id'], '_redirection_url', $_POST['redirect_url']);
+        }
+        
+        echo '<div class="alert alert-success">
+                        <strong>' . $string_add . ' the redirection successful. Coupon ID: <font color="red">' . $_POST['post_id'] . '</font><br/>
+                            URL: <font color="blue">' . $_POST['redirect_url'] . '</font>
+                            </strong>
+            </div>';
+        
+    }
     echo '<form role="form" method="post">
                                 <div class="form-group">
-                                    <label>Post ID</label>
-                                    <input type="number" class="form-control" id="post_id" name="post_id" value="" required>
+                                    <label>Coupon ID</label>
+                                    <input type="number" class="form-control" id="post_id" name="post_id" value="38179" required>
                                 </div>
                                 <div class="form-group">
                                     <label>Redirect URL</label>
                                     <input type="text" class="form-control" id="redirect_url" name="redirect_url" value="https://google.com.vn" required>
                                 </div>
                                 
-                                <input type="hidden" id="process_SetRedirect" name="process_SetRedirect">
+                                <input type="hidden" id="process_addNewCouponRedirection" name="process_addNewCouponRedirection">
 
                                 <button type="submit" class="btn btn-success">Add New</button>
                                 <button type="reset" class="btn btn-default">Reset</button>
         </form>';
     
-    echo '</div></div></div></div>';
+    echo '</div></div></div>';
     
-    echo '<div class="panel panel-default">
+    echo '
+                <div class="col-lg-6">
+                    <div class="panel panel-default">
                         <div class="panel-heading">
-                            Redirection Lists
+                            <strong><font color="blue">STORE Redirection</font></strong>
+                        </div>
+                        <div class="panel-body">';
+    
+    if (isset($_POST['process_addNewStoreRedirection'])) {
+        
+        $string_add = "Added";
+        if ( !add_post_meta($_POST['post_id'], '_redirection_url', $_POST['redirect_url'], TRUE) ) {
+            $string_add = "Updated";
+            update_post_meta($_POST['post_id'], '_redirection_url', $_POST['redirect_url']);
+        }
+        
+        echo '<div class="alert alert-success">
+                        <strong>' . $string_add . ' the redirection successful. Coupon ID: <font color="red">' . $_POST['post_id'] . '</font><br/>
+                            URL: <font color="blue">' . $_POST['redirect_url'] . '</font>
+                            </strong>
+            </div>';
+        
+    }
+    
+        echo '<form role="form" method="post">
+                                <div class="form-group">
+                                    <label>Store ID</label>
+                                    <input type="number" class="form-control" id="post_id" name="post_id" value="38179" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Redirect URL</label>
+                                    <input type="text" class="form-control" id="redirect_url" name="redirect_url" value="https://google.com.vn" required>
+                                </div>
+                                
+                                <input type="hidden" id="process_addNewStoreRedirection" name="process_addNewStoreRedirection">
+
+                                <button type="submit" class="btn btn-success">Add New</button>
+                                <button type="reset" class="btn btn-default">Reset</button>
+        </form>';
+      
+        echo '</div></div></div></div>';
+        echo '<div class="row"> 
+            <div class="col-lg-12">';
+        echo '<div class="panel panel-default">
+                        <div class="panel-heading">
+                            Redirection List
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
@@ -125,71 +168,39 @@ function function_redirection_page() {
                                     </div>
                                 </div>
                             <div class="col-sm-6"><div id="dataTables-example_filter" class="dataTables_filter"><label>Search:<input type="search" class="form-control input-sm" placeholder="" aria-controls="dataTables-example"></label></div></div></div><div class="row"><div class="col-sm-12"><table width="100%" class="table table-striped table-bordered table-hover dataTable no-footer dtr-inline" id="dataTables-example" role="grid" aria-describedby="dataTables-example_info" style="width: 100%;">
-                                <thead>
-                                    <tr role="row"><th class="sorting_desc" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Rendering engine: activate to sort column ascending" style="width: 170px;" aria-sort="descending">Rendering engine</th><th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending" style="width: 206px;">Browser</th><th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Platform(s): activate to sort column ascending" style="width: 189px;">Platform(s)</th><th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Engine version: activate to sort column ascending" style="width: 147px;">Engine version</th><th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="CSS grade: activate to sort column ascending" style="width: 110px;">CSS grade</th></tr>
-                                </thead>
-                                <tbody>
-                                <tr class="gradeA odd" role="row">
-                                        <td class="sorting_1">Webkit</td>
-                                        <td>Safari 1.2</td>
-                                        <td>OSX.3</td>
-                                        <td class="center">125.5</td>
-                                        <td class="center">A</td>
-                                    </tr><tr class="gradeA even" role="row">
-                                        <td class="sorting_1">Webkit</td>
-                                        <td>Safari 1.3</td>
-                                        <td>OSX.3</td>
-                                        <td class="center">312.8</td>
-                                        <td class="center">A</td>
-                                    </tr><tr class="gradeA odd" role="row">
-                                        <td class="sorting_1">Webkit</td>
-                                        <td>Safari 2.0</td>
-                                        <td>OSX.4+</td>
-                                        <td class="center">419.3</td>
-                                        <td class="center">A</td>
-                                    </tr><tr class="gradeA even" role="row">
-                                        <td class="sorting_1">Webkit</td>
-                                        <td>Safari 3.0</td>
-                                        <td>OSX.4+</td>
-                                        <td class="center">522.1</td>
-                                        <td class="center">A</td>
-                                    </tr><tr class="gradeA odd" role="row">
-                                        <td class="sorting_1">Webkit</td>
-                                        <td>OmniWeb 5.5</td>
-                                        <td>OSX.4+</td>
-                                        <td class="center">420</td>
-                                        <td class="center">A</td>
-                                    </tr><tr class="gradeA even" role="row">
-                                        <td class="sorting_1">Webkit</td>
-                                        <td>iPod Touch / iPhone</td>
-                                        <td>iPod</td>
-                                        <td class="center">420.1</td>
-                                        <td class="center">A</td>
-                                    </tr><tr class="gradeA odd" role="row">
-                                        <td class="sorting_1">Webkit</td>
-                                        <td>S60</td>
-                                        <td>S60</td>
-                                        <td class="center">413</td>
-                                        <td class="center">A</td>
-                                    </tr><tr class="gradeX even" role="row">
-                                        <td class="sorting_1">Trident</td>
-                                        <td>Internet Explorer 4.0</td>
-                                        <td>Win 95+</td>
-                                        <td class="center">4</td>
-                                        <td class="center">X</td>
-                                    </tr><tr class="gradeC odd" role="row">
-                                        <td class="sorting_1">Trident</td>
-                                        <td>Internet Explorer 5.0</td>
-                                        <td>Win 95+</td>
-                                        <td class="center">5</td>
-                                        <td class="center">C</td>
-                                    </tr><tr class="gradeA even" role="row">
-                                        <td class="sorting_1">Trident</td>
-                                        <td>Internet Explorer 5.5</td>
-                                        <td>Win 95+</td>
-                                        <td class="center">5.5</td>
-                                        <td class="center">A</td>
-                                    </tr></tbody>
+                               <thead>
+                                <tr role="row">
+                                   <th class="sorting_desc" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Rendering engine: activate to sort column ascending" style="width: 10px;" aria-sort="descending">Meta ID</th>
+                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending" style="width: 10px;">Post ID</th>
+                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Platform(s): activate to sort column ascending" style="width: 200px;">Post Title</th>
+                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Engine version: activate to sort column ascending" style="width: 300px;">Redirect URL</th>
+                                </tr>
+                             </thead>
+                                <tbody>';
+    
+    $all_redirections = $dbModel->getAllRedirection();
+//    echo "<pre>";
+//    print_r($all_redirections);
+//    echo "<pre>";
+//    exit;
+//    
+    $count = 0;
+    foreach ($all_redirections as $redirect) {
+        $count++;
+        if ($count % 2 == 0) {
+            $row_color = "gradeA odd";
+        } else {
+            $row_color = "gradeA even";
+        }
+        echo ' <tr class="' . $row_color . '" role="row">
+                        <td class="sorting_1">' . $redirect['meta_id'] . '</td>
+                       <td class="center">' . $redirect['post_id'] . '</td>
+                           <td><a href="' . $redirect['guid'] . '" target="_blank">' . $redirect['post_title'] . '</a></td>
+                       <td>' . $redirect['meta_value'] . '</td>
+                </tr>';
+    }
+                                
+                    echo '</tbody>
                             </table></div></div>
                             <!-- <div class="row"><div class="col-sm-6"><div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">Showing 1 to 10 of 57 entries</div></div><div class="col-sm-6"><div class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate"><ul class="pagination"><li class="paginate_button previous disabled" aria-controls="dataTables-example" tabindex="0" id="dataTables-example_previous"><a href="#">Previous</a></li><li class="paginate_button active" aria-controls="dataTables-example" tabindex="0"><a href="#">1</a></li><li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">2</a></li><li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">3</a></li><li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">4</a></li><li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">5</a></li><li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">6</a></li><li class="paginate_button next" aria-controls="dataTables-example" tabindex="0" id="dataTables-example_next"><a href="#">Next</a></li></ul></div></div></div></div> --> 
                             <!-- /.table-responsive -->
@@ -198,6 +209,6 @@ function function_redirection_page() {
                         <!-- /.panel-body -->
                     </div>';
     
-    echo '</div>';
+    echo '</div></div></div></div>';
 }
 ?>
