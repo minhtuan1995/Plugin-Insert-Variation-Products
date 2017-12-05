@@ -12,7 +12,7 @@ function delete_all_merchant_products() {
         session_start();
     }
 
-    if (ob_get_level() == 0)
+    if (ob_get_level() == 0) 
         ob_start();
 
     prefix_enqueue();

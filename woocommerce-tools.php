@@ -1,15 +1,15 @@
 <?php
 
 /**
- * Plugin Name: Insert Variation Products
+ * Plugin Name: WooCommerce Tools
  * Plugin URI: http://minhtuanit.me
- * Description: Add a variable product to WP. Errors are written to wp-admin/insert_product_logs.txt file.
- * Version: 1.00
+ * Description: A small tools to help you manage your WordPress - WooCommerce
+ * Version: 2.00
  * Author: Tuan Dao
  * Author URI: http://minhtuanit.me
  * License: GPL2
  * Created On: 11-01-2017
- * Updated On: 11-01-2017
+ * Updated On: 12-05-2017
  */
 // Define WC_PLUGIN_DIR.
 if (!defined('WC_PLUGIN_DIR')) {
@@ -23,15 +23,15 @@ if (!defined('WC_PLUGIN_URL')) {
 
 require_once('includes/autoload.php' );
 
-add_action('plugins_loaded', 'variations_plugin_init');
+add_action('plugins_loaded', 'woocommerce_tools_plugin_init');
 
-function variations_plugin_init() {
-    add_action('admin_menu', 'variation_products_admin_menu');
+function woocommerce_tools_plugin_init() {
+    add_action('admin_menu', 'woocommerce_tools_admin_menu');
     add_action('login_init', 'send_frame_options_header', 10, 0);
     add_action('admin_init', 'send_frame_options_header', 10, 0);
 }
 
-function variation_products_admin_menu() {
+function woocommerce_tools_admin_menu() {
 
     add_menu_page('Woo Tools', 'Woo Tools', 'manage_options', 'variation-products-main', 'variation_products_main_page', 'dashicons-welcome-widgets-menus', 3);
     add_submenu_page('variation-products-main', __('Woo Converter'), __('Woo Converter'), 'manage_options', 'variation-products-main');
