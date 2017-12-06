@@ -21,10 +21,15 @@ if (!defined('WC_PLUGIN_URL')) {
     define('WC_PLUGIN_URL', plugin_dir_url(__FILE__));
 }
 
+if (!defined('DB_REDIRECTION')) {
+    define('DB_REDIRECTION', 'wp_td_redirection');
+}
+
 require_once('autoload.php');
 require_once('includes/helper.php');
 
 add_action('plugins_loaded', 'woocommerce_tools_plugin_init');
+register_activation_hook(__FILE__, 'redirection_create_db');
 
 function woocommerce_tools_plugin_init() {
     add_action('admin_menu', 'woocommerce_tools_admin_menu');
@@ -55,6 +60,31 @@ function function_insert_test_page() {
 
 
     echo "INSERT TEST DONE";
+}
+
+function redirection_create_db() {
+    global $wpdb;
+    $db_name = DB_REDIRECTION;
+    $charset_collate = $wpdb->get_charset_collate();
+    
+    // create the ECPT metabox database table
+    if($wpdb->get_var("show tables like '$db_name'") != $db_name) 
+    {
+            $sql = 'CREATE TABLE ' . $db_name . ' (
+            `re_id` mediumint(9) NOT NULL AUTO_INCREMENT,
+            `re_source` mediumint(9) NOT NULL,
+            `re_source_multi` text NOT NULL,
+            `re_destination` text NOT NULL,
+            `re_type` tinytext NOT NULL,
+            `re_active` bit NOT NULL,
+            UNIQUE KEY re_id (re_id)
+            )' . $charset_collate . ';
+                
+            CREATE INDEX idx_postid ON $db_name (re_source);';
+
+            require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+            dbDelta($sql);
+    }
 }
 
 function function_redirection_page() {

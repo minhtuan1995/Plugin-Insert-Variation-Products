@@ -30,4 +30,48 @@ class DbModel {
         return $return;
         
     }
+    
+    public function add_redirection($source, $destination, $type = 'post', $source_multi = '') {
+        
+        $query = '  INSERT INTO ' . DB_REDIRECTION . '(re_source, re_source_multi, re_destination, re_type, re_active)
+                    VALUES (
+                    ' . $source . ',
+                    ' . $source_multi . ',
+                    ' . $destination . ',
+                    ' . $type . ',
+                    1,
+                )';
+
+        $result = mysqli_query($this->link, $query);
+
+        return true;
+        
+    }
+    
+    public function update_redirection($re_id, $source, $destination, $type = 'post', $source_multi = '') {
+        
+        $query = '  UPDATE ' . DB_REDIRECTION . '
+                    SET 
+                    re_source = ' . $source . ',
+                    re_source_multi = ' . $source_multi . ',
+                    re_destination = ' . $destination . ',
+                    re_type = ' . $type . ',
+                    re_active = 1
+                    WHERE re_id = ' . $re_id;
+
+        $result = mysqli_query($this->link, $query);
+
+        return true;
+        
+    }
+    
+    public function delete_redirection($re_id) {
+        
+        $query = '  DELETE FROM ' . DB_REDIRECTION . ' WHERE re_id = '. $re_id;
+
+        $result = mysqli_query($this->link, $query);
+
+        return true;
+        
+    }
 }
