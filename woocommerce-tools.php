@@ -44,22 +44,18 @@ function woocommerce_tools_plugin_init() {
 
 function function_insert_test_page() {
 
-    echo '<div class="wrap"><div id="icon-tools" class="icon32"></div>';
-    echo '<h2>TEST INSERT</h2>';
-    echo '</div>';
+    $results = new WP_Query( array(
+		'post_type'     => array( 'post', 'page' ),
+		'post_status'   => 'publish',
+		'nopaging'      => true,
+		'posts_per_page'=> 100,
+		's'             => 'hello',
+	) );
 
-    $rawData = file_get_contents(plugin_dir_path(__FILE__) . 'input/3products.json'); // Get json from sample file
-
-    $products = json_decode($rawData, true);
-
-    $link = 'http://vcshopify2.myshopify.com/products/';
-
-    foreach ($products['products'] as $product) {
-        $test = createShopifyProductFeed($product, $link);
-    }
-
-
-    echo "INSERT TEST DONE";
+        echo '<pre>';
+            print_r($results);
+        echo '</pre>';
+        exit;
 }
 
 function redirection_create_db() {
@@ -87,9 +83,12 @@ function redirection_create_db() {
     }
 }
 
+add_action( 'wp_enqueue_scripts', 'global_admin_ajax' );
+
 function function_redirection_page() {
     
     load_assets_redirection();
+    global_admin_ajax();
     
     $dbModel = new DbModel(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
     
@@ -146,9 +145,9 @@ function function_redirection_page() {
     if (isset($_POST['process_addNewStoreRedirection'])) {
         
         $string_add = "Added";
-        if ( !add_post_meta($_POST['post_id'], '_redirection_url', $_POST['redirect_url'], TRUE) ) {
+        if ( !add_post_meta($_POST['store_id'], '_redirection_url', $_POST['redirect_url'], TRUE) ) {
             $string_add = "Updated";
-            update_post_meta($_POST['post_id'], '_redirection_url', $_POST['redirect_url']);
+            update_post_meta($_POST['store_id'], '_redirection_url', $_POST['redirect_url']);
         }
         
         echo '<div class="alert alert-success">
@@ -158,11 +157,19 @@ function function_redirection_page() {
             </div>';
         
     }
-    
+        echo '<form role="search" method="get">
+                    <div class="form-group input-group">
+                                            <input type="text" id="store_search" name="s" class="form-control search-autocomplete" placeholder="Search">
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-default" type="button" disabled><i class="fa fa-search" button></i>
+                                                </button>
+                                            </span>
+                                        </div>
+            </form>';
         echo '<form role="form" method="post">
                                 <div class="form-group">
                                     <label>Store ID</label>
-                                    <input type="number" class="form-control" id="post_id" name="post_id" value="38179" required>
+                                    <input type="number" class="form-control" id="store_id" name="store_id" value="38179" required>
                                 </div>
                                 <div class="form-group">
                                     <label>Redirect URL</label>
@@ -185,19 +192,12 @@ function function_redirection_page() {
                         <!-- /.panel-heading -->
                         <div class="panel-body">
                             <div id="dataTables-example_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
-                                <div class="row"><div class="col-sm-6">
-                                    <div class="dataTables_length" id="dataTables-example_length">
-                                        <label>Show 
-                                            <select name="dataTables-example_length" aria-controls="dataTables-example" class="form-control input-sm">
-                                                <option value="10">10</option>
-                                                <option value="25">25</option>
-                                                <option value="50">50</option>
-                                                <option value="100">100</option>
-                                            </select> entries
-                                        </label>
-                                    </div>
-                                </div>
-                            <div class="col-sm-6"><div id="dataTables-example_filter" class="dataTables_filter"><label>Search:<input type="search" class="form-control input-sm" placeholder="" aria-controls="dataTables-example"></label></div></div></div><div class="row"><div class="col-sm-12"><table width="100%" class="table table-striped table-bordered table-hover dataTable no-footer dtr-inline" id="dataTables-example" role="grid" aria-describedby="dataTables-example_info" style="width: 100%;">
+                                <div class="row">
+                            
+                            </div></div>
+                            <div class="row">
+                            <div class="col-sm-12">
+                            <table width="100%" class="table table-striped table-bordered table-hover dataTable no-footer dtr-inline" id="dataTables-example" role="grid" aria-describedby="dataTables-example_info" style="width: 100%;">
                                <thead>
                                 <tr role="row">
                                    <th class="sorting_desc" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Rendering engine: activate to sort column ascending" style="width: 10px;" aria-sort="descending">Meta ID</th>
@@ -239,6 +239,35 @@ function function_redirection_page() {
                         <!-- /.panel-body -->
                     </div>';
     
-    echo '</div></div></div></div>';
+    echo '</div></div></div></div></div>';
 }
+
+
+function ja_ajax_search() {
+    
+	$results = new WP_Query( array(
+		'post_type'     => array( 'post', 'page' ),
+		'post_status'   => 'publish',
+		'nopaging'      => true,
+		'posts_per_page'=> 100,
+		's'             => stripslashes( $_POST['search'] ),
+	) );
+        
+	$items = array();
+	if ( !empty( $results->posts ) ) {
+		foreach ( $results->posts as $result ) {
+                    
+                    $item['ID'] = $result->ID;
+                    $item['post_title'] = $result->post_title;
+                    $items[] = $item;
+//			$items[] = $result->post_title;
+                        
+		}
+	}
+	wp_send_json_success( $items );
+        
+}
+
+add_action( 'wp_ajax_search_site',        'ja_ajax_search' );
+add_action( 'wp_ajax_nopriv_search_site', 'ja_ajax_search' );
 ?>

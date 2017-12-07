@@ -31,6 +31,8 @@ function load_assets_redirection() {
     wp_enqueue_script('prefix_bootstrap');
     wp_register_script('prefix_datatable', '//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js');
     wp_enqueue_script('prefix_datatable');
+    
+    wp_enqueue_script('my-scripts', WC_PLUGIN_URL . 'assets/redirection.js' );
 //    
     // CSS
     wp_register_style('prefix_bootstrap', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css');
@@ -38,6 +40,39 @@ function load_assets_redirection() {
     wp_register_style('prefix_datatable', '//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css');
     wp_enqueue_style('prefix_datatable');
     wp_enqueue_style('my-styles', WC_PLUGIN_URL . 'assets/styles.css' );
+    wp_enqueue_style('font-awesome', WC_PLUGIN_URL . 'assets/font-awesome/css/font-awesome.min.css' );
+}
+
+function global_admin_ajax() {
+    wp_enqueue_style(
+            'jquery-auto-complete',
+            'https://cdnjs.cloudflare.com/ajax/libs/jquery-autocomplete/1.0.7/jquery.auto-complete.css',
+            array(),
+            '1.0.7'
+    );
+    wp_enqueue_script(
+            'jquery-auto-complete',
+            'https://cdnjs.cloudflare.com/ajax/libs/jquery-autocomplete/1.0.7/jquery.auto-complete.min.js',
+            array( 'jquery' ),
+            '1.0.7',
+            true
+    );
+    
+    wp_enqueue_script(
+		'global',
+		WC_PLUGIN_URL . 'assets/redirection.js',
+		array( 'jquery' ),
+		'1.0.0',
+		true
+	);
+    
+    wp_localize_script(
+		'global',
+		'global',
+		array(
+			'ajax' => admin_url( 'admin-ajax.php' ),
+		)
+	);
 }
 
 function prefix_enqueue_insert_variation() {       
