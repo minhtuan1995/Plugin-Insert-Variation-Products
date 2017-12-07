@@ -43,10 +43,10 @@ function woocommerce_tools_plugin_init() {
  */
 
 function function_insert_test_page() {
-//
+
 //        $dbModel = new DbModel(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
 //        
-//	$results = $dbModel->getAllCouponStore();
+//	//$results = $dbModel->check_exists_redirection(400, );
 //        
 //        echo '<pre>';
 //            print_r($results);
@@ -99,10 +99,12 @@ function function_redirection_page() {
                         
     if (isset($_POST['process_addNewCouponRedirection'])) {
         
-        $string_add = "Added";
-        if ( !add_post_meta($_POST['post_id'], '_redirection_url', $_POST['post_redirect_url'], TRUE) ) {
+        $add = $dbModel->add_redirection($_POST['post_id'], $_POST['post_redirect_url'], 'coupon');
+        
+        if ($add) {
+            $string_add = "Added";
+        } else {
             $string_add = "Updated";
-            update_post_meta($_POST['post_id'], '_redirection_url', $_POST['post_redirect_url']);
         }
         
         echo '<div class="alert alert-success">
@@ -124,7 +126,7 @@ function function_redirection_page() {
     echo '<form role="form" method="post">
                                 <div class="form-group">
                                     <label>Coupon ID</label>
-                                    <input type="number" class="form-control" id="post_id" name="post_id" value="38179" required>
+                                    <input type="number" class="form-control" id="post_id" name="post_id" value="400" required>
                                 </div>
                                 <div class="form-group">
                                     <label>Redirect URL</label>
@@ -149,10 +151,12 @@ function function_redirection_page() {
     
     if (isset($_POST['process_addNewStoreRedirection'])) {
         
-        $string_add = "Added";
-        if ( !add_post_meta($_POST['store_id'], '_redirection_url', $_POST['store_redirect_url'], TRUE) ) {
+        $add = $dbModel->add_redirection($_POST['store_id'], $_POST['store_redirect_url'], 'store');
+        
+        if ($add) {
+            $string_add = "Added";
+        } else {
             $string_add = "Updated";
-            update_post_meta($_POST['store_id'], '_redirection_url', $_POST['store_redirect_url']);
         }
         
         echo '<div class="alert alert-success">
@@ -174,7 +178,7 @@ function function_redirection_page() {
         echo '<form role="form" method="post">
                                 <div class="form-group">
                                     <label>Store ID</label>
-                                    <input type="number" class="form-control" id="store_id" name="store_id" value="38179" required>
+                                    <input type="number" class="form-control" id="store_id" name="store_id" value="34" required>
                                 </div>
                                 <div class="form-group">
                                     <label>Redirect URL</label>
@@ -205,20 +209,20 @@ function function_redirection_page() {
                             <table width="100%" class="table table-striped table-bordered table-hover dataTable no-footer dtr-inline" id="dataTables-example" role="grid" aria-describedby="dataTables-example_info" style="width: 100%;">
                                <thead>
                                 <tr role="row">
-                                   <th class="sorting_desc" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Rendering engine: activate to sort column ascending" style="width: 10px;" aria-sort="descending">Meta ID</th>
-                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending" style="width: 10px;">Post ID</th>
-                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Platform(s): activate to sort column ascending" style="width: 200px;">Post Title</th>
+                                   <th class="sorting_desc" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Rendering engine: activate to sort column ascending" style="width: 10px;" aria-sort="descending">ID</th>
+                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending" style="width: 10px;">Coupon/Store ID</th>
+                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending" style="width: 10px;">Type</th>
+                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Platform(s): activate to sort column ascending" style="width: 200px;">Title</th>
                                    <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Engine version: activate to sort column ascending" style="width: 300px;">Redirect URL</th>
                                 </tr>
                              </thead>
                                 <tbody>';
     
-    $all_redirections = $dbModel->getAllRedirection();
-//    echo "<pre>";
-//    print_r($all_redirections);
-//    echo "<pre>";
-//    exit;
-//    
+    $all_coupon_redirections = $dbModel->getAllCouponRedirection();
+    $all_store_redirections = $dbModel->getAllStoreRedirection();
+    
+    $all_redirections = array_merge($all_coupon_redirections, $all_store_redirections);
+    
     $count = 0;
     foreach ($all_redirections as $redirect) {
         $count++;
@@ -228,13 +232,14 @@ function function_redirection_page() {
             $row_color = "gradeA even";
         }
         echo ' <tr class="' . $row_color . '" role="row">
-                        <td class="sorting_1">' . $redirect['meta_id'] . '</td>
-                       <td class="center">' . $redirect['post_id'] . '</td>
-                           <td><a href="' . $redirect['guid'] . '" target="_blank">' . $redirect['post_title'] . '</a></td>
-                       <td>' . $redirect['meta_value'] . '</td>
+                        <td class="sorting_1">' . $redirect['re_id'] . '</td>
+                       <td class="center">' . $redirect['re_source'] . '</td>
+                           <td class="center">' . $redirect['re_type'] . '</td>
+                               <td class="center">' . $redirect['name'] . '</td>
+                       <td>' . urldecode($redirect['re_destination']) . '</td>
                 </tr>';
     }
-                                
+    // <td><a href="' . $redirect['guid'] . '" target="_blank">' . $redirect['post_title'] . '</a></td>                            
                     echo '</tbody>
                             </table></div></div>
                             <!-- <div class="row"><div class="col-sm-6"><div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">Showing 1 to 10 of 57 entries</div></div><div class="col-sm-6"><div class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate"><ul class="pagination"><li class="paginate_button previous disabled" aria-controls="dataTables-example" tabindex="0" id="dataTables-example_previous"><a href="#">Previous</a></li><li class="paginate_button active" aria-controls="dataTables-example" tabindex="0"><a href="#">1</a></li><li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">2</a></li><li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">3</a></li><li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">4</a></li><li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">5</a></li><li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">6</a></li><li class="paginate_button next" aria-controls="dataTables-example" tabindex="0" id="dataTables-example_next"><a href="#">Next</a></li></ul></div></div></div></div> --> 

@@ -19,10 +19,14 @@ class DbModel {
         $this->link = mysqli_connect($host, $user, $pass, $dbname);
     }
     
-    public function getAllRedirection() {
+    public function getAllRedirection($type = '') {
         
-        $query = "SELECT meta_id, post_id, meta_value, post_title, guid FROM wp_postmeta INNER JOIN wp_posts ON wp_postmeta.post_id = wp_posts.ID WHERE meta_key = '_redirection_url'";
-
+        $query = "SELECT * FROM " . DB_REDIRECTION;
+        
+        if (!empty($type)) {
+            $query .= 'WHERE re_type = "' . $type . '"';
+        }
+        
         $result = mysqli_query($this->link, $query);
 
         $return = mysqli_fetch_all($result, MYSQLI_ASSOC);
@@ -31,31 +35,74 @@ class DbModel {
         
     }
     
-    public function add_redirection($source, $destination, $type = 'post', $source_multi = '') {
+    public function getAllStoreRedirection() {
         
-        $query = '  INSERT INTO ' . DB_REDIRECTION . '(re_source, re_source_multi, re_destination, re_type, re_active)
-                    VALUES (
-                    ' . $source . ',
-                    ' . $source_multi . ',
-                    ' . $destination . ',
-                    ' . $type . ',
-                    1,
-                )';
-
+        $query = "SELECT * FROM " . DB_REDIRECTION . ' INNER JOIN wp_terms ON re_source = wp_terms.term_id WHERE re_type = "store"';
+        
         $result = mysqli_query($this->link, $query);
 
-        return true;
+        $return = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+        return $return;
         
     }
     
+    public function getAllCouponRedirection() {
+        
+        $query = "SELECT re_id, re_source, re_destination, re_type, re_active, post_title as 'name' FROM " . DB_REDIRECTION . ' INNER JOIN wp_posts ON re_source = wp_posts.ID WHERE re_type = "coupon"';
+        
+        $result = mysqli_query($this->link, $query);
+
+        $return = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+        return $return;
+        
+    }
+    
+    public function add_redirection($source, $destination, $type = 'post', $active = 1, $source_multi = '') {
+        
+        $exists = $this->check_exists_redirection($source, $type);
+        
+        if ($exists != false) {
+            $this->update_redirection($exists['re_id'], $source, $destination, $type, $source_multi);
+            return false;
+        } else {
+            $query = '  INSERT INTO ' . DB_REDIRECTION . '(re_source, re_source_multi, re_destination, re_type, re_active)
+                        VALUES (
+                        ' . $source . ',
+                        "' . urlencode($source_multi) . '",
+                        "' . urlencode($destination) . '",
+                        "' . $type . '",
+                        ' . $active . ')';
+
+            $result = mysqli_query($this->link, $query);
+            return true;
+        }
+    }
+    
+    public function check_exists_redirection($source, $type, $source_multi = '') {
+        
+        $query = 'SELECT * FROM ' . DB_REDIRECTION . ' WHERE re_source = ' . $source . ' AND re_type = "' . $type . '"';
+        
+        $result = mysqli_query($this->link, $query);
+
+        $return = mysqli_fetch_assoc($result);
+
+        if (empty($return)) {
+            return false;
+        }
+        
+        return $return;
+    }
+
     public function update_redirection($re_id, $source, $destination, $type = 'post', $source_multi = '') {
         
         $query = '  UPDATE ' . DB_REDIRECTION . '
                     SET 
                     re_source = ' . $source . ',
-                    re_source_multi = ' . $source_multi . ',
-                    re_destination = ' . $destination . ',
-                    re_type = ' . $type . ',
+                    re_source_multi = "' . urlencode($source_multi) . '",
+                    re_destination = "' . urlencode($destination) . '",
+                    re_type = "' . $type . '",
                     re_active = 1
                     WHERE re_id = ' . $re_id;
 

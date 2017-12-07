@@ -19,38 +19,44 @@ if (!defined('REDIRECTION_SOURCE')) {
     define('REDIRECTION_SOURCE', 'shoppingstore02.ga');
 }
 
-if (!class_exists( 'TD_Redirection' ) ) {
+if (!class_exists('TD_Redirection')) {
+
     class TD_Redirection {
-        
+
         function __construct() {
             add_action('redirection_check', array(&$this, 'redirection_check_redirection'));
         }
 
-        function redirection_check_redirection($post_id = '', $store_id = '', $source = '') {
+        function redirection_check_redirection() {
 
-            if (empty($post_id)) {
-                $post_id = get_the_ID();
-            }
-            
-            if ($source == '') {
-                $source = REDIRECTION_SOURCE;
-            }
-            
-            if(isset($_SERVER['HTTP_REFERER'])) {
-                
+            if (isset($_SERVER['HTTP_REFERER'])) {
+
                 $check = strpos($_SERVER['HTTP_REFERER'], REDIRECTION_SOURCE);
-                
+
                 if ($check !== false) {
-                    
-                    if (!empty($post_id)) {
-                        $this->redirection_by_post_id($post_id);
+
+                    $dbModel = new DbModel(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+
+                    $post_id = get_the_ID();
+
+                    if ($post_id != 999999) {
+                        $exists = $dbModel->check_exists_redirection($post_id, 'coupon');
+                        if ($exists != false) {
+                            $this->redirection_by_url(urldecode($exists['re_destination']));
+                        }
+                    } else {
+                        $queried_object = get_queried_object();
+                        if (isset($queried_object->taxonomy) && $queried_object->taxonomy == 'coupon_store') {
+                            $exists = $dbModel->check_exists_redirection($queried_object->term_id, 'store');
+                            if ($exists != false) {
+                                $this->redirection_by_url(urldecode($exists['re_destination']));
+                            }
+                        }
                     }
-                    
                 }
             } else {
                 echo '<meta name="plugin" content="TD_Redirection">';
             }
-            
         }
 
         public function redirection_by_url($redirect_url = '') {
@@ -58,7 +64,7 @@ if (!class_exists( 'TD_Redirection' ) ) {
                 echo '<meta http-equiv="refresh" content="0; url=' . $redirect_url . '">';
             }
         }
-        
+
         public function redirection_by_post_id($post_id = '') {
             if (!empty($post_id)) {
 
@@ -70,9 +76,11 @@ if (!class_exists( 'TD_Redirection' ) ) {
                 }
             }
         }
+
     }
+
 }
 
-if (class_exists( 'TD_Redirection' )) {
+if (class_exists('TD_Redirection')) {
     $MyRedirection = new TD_Redirection();
 }
