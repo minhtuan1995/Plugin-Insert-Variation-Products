@@ -116,6 +116,15 @@ function function_redirection_page() {
             </div>';
         
     }
+    echo '<form role="search" method="get">
+                    <div class="form-group input-group">
+                                            <input type="text" id="post_search" name="s" class="form-control search-autocomplete" placeholder="Search">
+                                            <span class="input-group-btn">
+                                                <button class="btn btn-default" type="button" disabled><i class="fa fa-search" button></i>
+                                                </button>
+                                            </span>
+                                        </div>
+            </form>';
     echo '<form role="form" method="post">
                                 <div class="form-group">
                                     <label>Coupon ID</label>
