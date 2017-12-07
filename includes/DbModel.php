@@ -111,6 +111,19 @@ class DbModel {
         return true;
         
     }
+
+    public function update_active_redirection($re_id, $active = '1') {
+        
+        $query = '  UPDATE ' . DB_REDIRECTION . '
+                    SET 
+                    re_active = ' . $active . '
+                    WHERE re_id = ' . $re_id;
+
+        $result = mysqli_query($this->link, $query);
+
+        return true;
+        
+    }
     
     public function delete_redirection($re_id) {
         

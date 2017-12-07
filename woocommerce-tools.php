@@ -43,15 +43,8 @@ function woocommerce_tools_plugin_init() {
  */
 
 function function_insert_test_page() {
-
-//        $dbModel = new DbModel(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
-//        
-//	//$results = $dbModel->check_exists_redirection(400, );
-//        
-//        echo '<pre>';
-//            print_r($results);
-//        echo '</pre>';
-//        exit;
+    echo get_term_link(34);
+    //echo get_permalink('400');
 }
 
 function redirection_create_db() {
@@ -214,6 +207,7 @@ function function_redirection_page() {
                                    <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending" style="width: 10px;">Type</th>
                                    <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Platform(s): activate to sort column ascending" style="width: 200px;">Title</th>
                                    <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Engine version: activate to sort column ascending" style="width: 300px;">Redirect URL</th>
+                                   <th aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Engine version: activate to sort column ascending" style="width: 10px;"></th>
                                 </tr>
                              </thead>
                                 <tbody>';
@@ -225,6 +219,17 @@ function function_redirection_page() {
     
     $count = 0;
     foreach ($all_redirections as $redirect) {
+
+        if ($redirect['re_type'] == 'store') {
+            $url = get_term_link((int)$redirect['re_source']);
+        } else {
+            $url = get_permalink($redirect['re_source']);
+        }
+
+        if (isset($url->errors)) {
+            $url = '';
+        }
+
         $count++;
         if ($count % 2 == 0) {
             $row_color = "gradeA odd";
@@ -234,10 +239,22 @@ function function_redirection_page() {
         echo ' <tr class="' . $row_color . '" role="row">
                         <td class="sorting_1">' . $redirect['re_id'] . '</td>
                        <td class="center">' . $redirect['re_source'] . '</td>
-                           <td class="center">' . $redirect['re_type'] . '</td>
-                               <td class="center">' . $redirect['name'] . '</td>
-                       <td>' . urldecode($redirect['re_destination']) . '</td>
-                </tr>';
+                           <td class="center">' . $redirect['re_type'] . '</td>';
+            if (!empty($url)) {
+                echo '<td class="center"><a href="' . $url . '" target="_blank" >' . $redirect['name'] . ' </a></td>';
+            } else {
+                echo '<td class="center">' . $redirect['name'] . '</td>';
+            }
+                            
+            echo '<td>' . urldecode($redirect['re_destination']) . '</td>';
+                       
+            if ($redirect['re_active']) {
+                echo '<td><button type="button" class="btn btn-success btn-xs" onclick="setInactive(' . $redirect['re_id'] . ')">ON</button></td>';
+            } else {
+                echo '<td><button type="button" class="btn btn-default btn-xs" onclick="setActive(' . $redirect['re_id'] . ')">OFF</button></td>';
+            }
+
+        echo '</tr>';
     }
     // <td><a href="' . $redirect['guid'] . '" target="_blank">' . $redirect['post_title'] . '</a></td>                            
                     echo '</tbody>
@@ -301,4 +318,18 @@ function ja_ajax_search_store() {
 
 add_action( 'wp_ajax_search_store',        'ja_ajax_search_store' );
 add_action( 'wp_ajax_nopriv_search_store', 'ja_ajax_search_store' );
+
+function ja_ajax_set_active_redirection($re_id, $re_active) {
+    
+    $dbModel = new DbModel(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+    
+    $dbModel->update_active_redirection($re_id, $re_active);
+    
+    $return['status'] = $re_active;
+
+    wp_send_json_success( $return );
+}
+
+add_action( 'wp_ajax_set_active_redirection', 'ja_ajax_set_active_redirection' );
+add_action( 'wp_ajax_nopriv_set_active_redirection', 'ja_ajax_set_active_redirection' );
 ?>

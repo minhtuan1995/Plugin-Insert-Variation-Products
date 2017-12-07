@@ -27,10 +27,17 @@ function prefix_enqueue() {
 
 function load_assets_redirection() {
         // JS
+       
     wp_register_script('prefix_bootstrap', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js');
     wp_enqueue_script('prefix_bootstrap');
+    wp_register_script('prefix_jquery', WC_PLUGIN_URL . 'assets/jquery-3.2.1.min.js');
+    wp_enqueue_script('prefix_jquery'); 
     wp_register_script('prefix_datatable', '//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js');
     wp_enqueue_script('prefix_datatable');
+    wp_register_script('prefix_datatable', '//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js');
+    wp_enqueue_script('prefix_datatable');
+    wp_register_script('prefix_toggle', WC_PLUGIN_URL . 'assets/bootstrap-toggle.js');
+    wp_enqueue_script('prefix_toggle');
     
     wp_enqueue_script('my-scripts', WC_PLUGIN_URL . 'assets/redirection.js' );
 //    
@@ -39,6 +46,9 @@ function load_assets_redirection() {
     wp_enqueue_style('prefix_bootstrap');
     wp_register_style('prefix_datatable', '//cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css');
     wp_enqueue_style('prefix_datatable');
+    wp_register_style('prefix_toggle', '//gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css');
+    wp_enqueue_style('prefix_toggle');
+
     wp_enqueue_style('my-styles', WC_PLUGIN_URL . 'assets/styles.css' );
     wp_enqueue_style('font-awesome', WC_PLUGIN_URL . 'assets/font-awesome/css/font-awesome.min.css' );
 }

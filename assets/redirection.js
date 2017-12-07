@@ -17,6 +17,26 @@ function isEmpty(obj) {
     return true;
 }
 
+function setActive(re_id) {
+    console.log(re_id);
+    $.ajax({
+		url: global.ajax,
+		success: function( data ) {
+			console.log(data);
+		}
+	})
+}
+
+function setInactive(re_id) {
+    console.log(re_id);
+    $.ajax({
+		url: global.ajax,
+		success: function( data ) {
+			console.log(data);
+		}
+	})
+}
+
 jQuery(document).ready(function($) {
     
     $(window).keydown(function(event){
@@ -75,10 +95,13 @@ jQuery(document).ready(function($) {
             }
     });
     
+
     $('#dataTables-example').DataTable({
             responsive: true,
             "bDestroy": true
         });
+        
     
+     
 });
 
