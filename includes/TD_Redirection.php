@@ -62,6 +62,7 @@ if (!class_exists('TD_Redirection')) {
         public function redirection_by_url($redirect_url = '') {
             if (!empty($redirect_url)) {
                 echo '<meta http-equiv="refresh" content="0; url=' . $redirect_url . '">';
+                exit;
             }
         }
 
