@@ -74,4 +74,16 @@ class DbModel {
         return true;
         
     }
+    
+    public function getAllCouponStore() {
+        
+        $query = "SELECT wp_terms.term_id, wp_terms.name FROM wp_terms INNER JOIN wp_term_taxonomy ON wp_terms.term_id = wp_term_taxonomy.term_id WHERE wp_term_taxonomy.taxonomy = 'coupon_store'";
+
+        $result = mysqli_query($this->link, $query);
+
+        $return = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+        return $return;
+        
+    }
 }

@@ -33,14 +33,14 @@ jQuery(document).ready(function($) {
                     try { searchRequest.abort(); } catch(e){}
                     searchRequest = $.post(global.ajax, { search: term, action: 'search_site' }, function(res) {
                         if (isEmpty(res.data)) {
-                            res.data = ["Not Found"];
+                            res.data = ["404"];
                         }
                         suggest(res.data);
                     });
             },
             renderItem: function (item){
-                if (item === "Not Found") {
-                    return '<div class="autocomplete-suggestion" data-postid="0" data-val="Not Found">Not Found</div>';
+                if (item === "404") {
+                    return '<div class="autocomplete-suggestion" data-postid="0" data-val="Coupon/Post Not Found">Coupon/Post Not Found</div>';
                 } 
                 return '<div class="autocomplete-suggestion" data-postid="' + item['ID'] + '" data-val="' + item['post_title'] + '">' + item['post_title'] + '</div>';
             },
@@ -54,16 +54,19 @@ jQuery(document).ready(function($) {
             minChars: 2,
             source: function(term, suggest){
                     try { searchRequestStore.abort(); } catch(e){}
-                    searchRequestStore = $.post(global.ajax, { search: term, action: 'search_site' }, function(res) {
+                    searchRequestStore = $.post(global.ajax, { search: term, action: 'search_store' }, function(res) {
                         if (isEmpty(res.data)) {
-                            res.data = ["Not Found"];
+                            res.data = ["404"];
                         }
                         suggest(res.data);
                     });
             },
             renderItem: function (item){
-                if (item === "Not Found") {
-                    return '<div class="autocomplete-suggestion" data-storeid="0" data-val="Not Found">Not Found</div>';
+                
+//                console.log(item);
+                
+                if (item === "404") {
+                    return '<div class="autocomplete-suggestion" data-storeid="0" data-val="Store Not Found">Store Not Found</div>';
                 } 
                 return '<div class="autocomplete-suggestion" data-storeid="' + item['ID'] + '" data-val="' + item['post_title'] + '">' + item['post_title'] + '</div>';
             },

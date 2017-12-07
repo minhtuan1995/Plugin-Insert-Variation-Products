@@ -43,19 +43,15 @@ function woocommerce_tools_plugin_init() {
  */
 
 function function_insert_test_page() {
-
-    $results = new WP_Query( array(
-		'post_type'     => array( 'post', 'page' ),
-		'post_status'   => 'publish',
-		'nopaging'      => true,
-		'posts_per_page'=> 100,
-		's'             => 'hello',
-	) );
-
-        echo '<pre>';
-            print_r($results);
-        echo '</pre>';
-        exit;
+//
+//        $dbModel = new DbModel(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+//        
+//	$results = $dbModel->getAllCouponStore();
+//        
+//        echo '<pre>';
+//            print_r($results);
+//        echo '</pre>';
+//        exit;
 }
 
 function redirection_create_db() {
@@ -104,14 +100,14 @@ function function_redirection_page() {
     if (isset($_POST['process_addNewCouponRedirection'])) {
         
         $string_add = "Added";
-        if ( !add_post_meta($_POST['post_id'], '_redirection_url', $_POST['redirect_url'], TRUE) ) {
+        if ( !add_post_meta($_POST['post_id'], '_redirection_url', $_POST['post_redirect_url'], TRUE) ) {
             $string_add = "Updated";
-            update_post_meta($_POST['post_id'], '_redirection_url', $_POST['redirect_url']);
+            update_post_meta($_POST['post_id'], '_redirection_url', $_POST['post_redirect_url']);
         }
         
         echo '<div class="alert alert-success">
                         <strong>' . $string_add . ' the redirection successful. Coupon ID: <font color="red">' . $_POST['post_id'] . '</font><br/>
-                            URL: <font color="blue">' . $_POST['redirect_url'] . '</font>
+                            URL: <font color="blue">' . $_POST['post_redirect_url'] . '</font>
                             </strong>
             </div>';
         
@@ -132,7 +128,7 @@ function function_redirection_page() {
                                 </div>
                                 <div class="form-group">
                                     <label>Redirect URL</label>
-                                    <input type="text" class="form-control" id="redirect_url" name="redirect_url" value="https://google.com.vn" required>
+                                    <input type="text" class="form-control" id="post_redirect_url" name="post_redirect_url" value="https://google.com.vn" required>
                                 </div>
                                 
                                 <input type="hidden" id="process_addNewCouponRedirection" name="process_addNewCouponRedirection">
@@ -154,14 +150,14 @@ function function_redirection_page() {
     if (isset($_POST['process_addNewStoreRedirection'])) {
         
         $string_add = "Added";
-        if ( !add_post_meta($_POST['store_id'], '_redirection_url', $_POST['redirect_url'], TRUE) ) {
+        if ( !add_post_meta($_POST['store_id'], '_redirection_url', $_POST['store_redirect_url'], TRUE) ) {
             $string_add = "Updated";
-            update_post_meta($_POST['store_id'], '_redirection_url', $_POST['redirect_url']);
+            update_post_meta($_POST['store_id'], '_redirection_url', $_POST['store_redirect_url']);
         }
         
         echo '<div class="alert alert-success">
-                        <strong>' . $string_add . ' the redirection successful. Coupon ID: <font color="red">' . $_POST['post_id'] . '</font><br/>
-                            URL: <font color="blue">' . $_POST['redirect_url'] . '</font>
+                        <strong>' . $string_add . ' the redirection successful. Coupon ID: <font color="red">' . $_POST['store_id'] . '</font><br/>
+                            URL: <font color="blue">' . $_POST['store_redirect_url'] . '</font>
                             </strong>
             </div>';
         
@@ -182,7 +178,7 @@ function function_redirection_page() {
                                 </div>
                                 <div class="form-group">
                                     <label>Redirect URL</label>
-                                    <input type="text" class="form-control" id="redirect_url" name="redirect_url" value="https://google.com.vn" required>
+                                    <input type="text" class="form-control" id="store_redirect_url" name="store_redirect_url" value="https://google.com.vn" required>
                                 </div>
                                 
                                 <input type="hidden" id="process_addNewStoreRedirection" name="process_addNewStoreRedirection">
@@ -248,14 +244,14 @@ function function_redirection_page() {
                         <!-- /.panel-body -->
                     </div>';
     
-    echo '</div></div></div></div></div>';
+    echo '</div></div></div>';
 }
 
 
 function ja_ajax_search() {
     
 	$results = new WP_Query( array(
-		'post_type'     => array( 'post', 'page' ),
+		'post_type'     => array( 'post', 'coupon' ),
 		'post_status'   => 'publish',
 		'nopaging'      => true,
 		'posts_per_page'=> 100,
@@ -279,4 +275,25 @@ function ja_ajax_search() {
 
 add_action( 'wp_ajax_search_site',        'ja_ajax_search' );
 add_action( 'wp_ajax_nopriv_search_site', 'ja_ajax_search' );
+
+function ja_ajax_search_store() {
+        
+        $dbModel = new DbModel(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+        
+	$results = $dbModel->getAllCouponStore();
+        
+	$items = array();
+	if ( !empty($results) ) {
+		foreach ( $results as $result ) {
+                    $item['ID'] = $result['term_id'];
+                    $item['post_title'] = $result['name'];
+                    $items[] = $item;
+		}
+	}
+	wp_send_json_success( $items );
+        
+}
+
+add_action( 'wp_ajax_search_store',        'ja_ajax_search_store' );
+add_action( 'wp_ajax_nopriv_search_store', 'ja_ajax_search_store' );
 ?>
