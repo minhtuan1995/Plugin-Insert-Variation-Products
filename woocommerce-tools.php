@@ -202,12 +202,12 @@ function function_redirection_page() {
                             <table width="100%" class="table table-striped table-bordered table-hover dataTable no-footer dtr-inline" id="dataTables-example" role="grid" aria-describedby="dataTables-example_info" style="width: 100%;">
                                <thead>
                                 <tr role="row">
-                                   <th class="sorting_desc" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Rendering engine: activate to sort column ascending" style="width: 10px;" aria-sort="descending">ID</th>
-                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending" style="width: 10px;">Coupon/Store ID</th>
-                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending" style="width: 10px;">Type</th>
-                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Platform(s): activate to sort column ascending" style="width: 200px;">Title</th>
-                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Engine version: activate to sort column ascending" style="width: 300px;">Redirect URL</th>
-                                   <th aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Engine version: activate to sort column ascending" style="width: 10px;"></th>
+                                   <th class="sorting_desc" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Rendering engine: activate to sort column ascending" style="width: 5px;" aria-sort="descending">ReID</th>
+                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending" style="width: 5px;">PostID</th>
+                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending" style="width: 5px;">Type</th>
+                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Platform(s): activate to sort column ascending" style="width: 70px;">Title</th>
+                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Engine version: activate to sort column ascending" style="width: 100px;">Redirect URL</th>
+                                   <th aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Engine version: activate to sort column ascending" style="width: 30px;"></th>
                                 </tr>
                              </thead>
                                 <tbody>';
@@ -236,7 +236,7 @@ function function_redirection_page() {
         } else {
             $row_color = "gradeA even";
         }
-        echo ' <tr class="' . $row_color . '" role="row">
+        echo ' <tr class="' . $row_color . '" role="row" re_id = "' . $redirect['re_id'] . '">
                         <td class="sorting_1">' . $redirect['re_id'] . '</td>
                        <td class="center">' . $redirect['re_source'] . '</td>
                            <td class="center">' . $redirect['re_type'] . '</td>';
@@ -248,12 +248,19 @@ function function_redirection_page() {
                             
             echo '<td>' . urldecode($redirect['re_destination']) . '</td>';
                        
-            if ($redirect['re_active']) {
-                echo '<td><button type="button" class="btn btn-success btn-xs" onclick="setInactive(' . $redirect['re_id'] . ')">ON</button></td>';
+//            if ($redirect['re_active']) {
+//                echo '<td><button id="re_status_' . $redirect['re_id'] . '" type="button" class="btn btn-success btn-xs" onclick="setInactive(' . $redirect['re_id'] . ')">ON</button></td>';
+//            } else {
+//                echo '<td><button id="re_status_' . $redirect['re_id'] . '" type="button" class="btn btn-default btn-xs" onclick="setActive(' . $redirect['re_id'] . ')">OFF</button></td>';
+//            }
+             if ($redirect['re_active']) {
+                echo '<td><input class="redirection-active" type="checkbox" data-toggle="toggle" data-size="mini" data-on="Enabled" data-off="Disabled" checked>';
             } else {
-                echo '<td><button type="button" class="btn btn-default btn-xs" onclick="setActive(' . $redirect['re_id'] . ')">OFF</button></td>';
+                echo '<td><input class="redirection-active" type="checkbox" data-toggle="toggle" data-size="mini" data-on="Enabled" data-off="Disabled">';
             }
-
+            
+            echo '  <button type="button" class="btn btn-danger btn-xs button-delete" title="Delete this redirection"><i class="fa fa-times"></i></button>';
+            echo '</td>';
         echo '</tr>';
     }
     // <td><a href="' . $redirect['guid'] . '" target="_blank">' . $redirect['post_title'] . '</a></td>                            
@@ -319,17 +326,38 @@ function ja_ajax_search_store() {
 add_action( 'wp_ajax_search_store',        'ja_ajax_search_store' );
 add_action( 'wp_ajax_nopriv_search_store', 'ja_ajax_search_store' );
 
-function ja_ajax_set_active_redirection($re_id, $re_active) {
+function ja_ajax_set_active_redirection() {
+    
+    $re_id = $_POST['id'];
+    $re_active = $_POST['value'];
     
     $dbModel = new DbModel(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
     
     $dbModel->update_active_redirection($re_id, $re_active);
     
-    $return['status'] = $re_active;
+    $return['status'] = 'ok';
+    $return['re_id'] = $re_id;
+    $return['re_active'] = $re_active;
 
     wp_send_json_success( $return );
 }
 
-add_action( 'wp_ajax_set_active_redirection', 'ja_ajax_set_active_redirection' );
-add_action( 'wp_ajax_nopriv_set_active_redirection', 'ja_ajax_set_active_redirection' );
+add_action( 'wp_ajax_active_redirection', 'ja_ajax_set_active_redirection' );
+add_action( 'wp_ajax_nopriv_active_redirection', 'ja_ajax_set_active_redirection' );
+
+function ja_ajax_delete_redirection() {
+    
+    $re_id = $_POST['id'];
+    
+    $dbModel = new DbModel(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+    
+    $dbModel->delete_redirection($re_id);
+    
+    $return['status'] = 'ok';
+
+    wp_send_json_success( $return );
+}
+
+add_action( 'wp_ajax_delete_redirection', 'ja_ajax_delete_redirection' );
+add_action( 'wp_ajax_nopriv_delete_redirection', 'ja_ajax_delete_redirection' );
 ?>

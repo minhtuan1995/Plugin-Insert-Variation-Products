@@ -39,7 +39,6 @@ function load_assets_redirection() {
     wp_register_script('prefix_toggle', WC_PLUGIN_URL . 'assets/bootstrap-toggle.js');
     wp_enqueue_script('prefix_toggle');
     
-    wp_enqueue_script('my-scripts', WC_PLUGIN_URL . 'assets/redirection.js' );
 //    
     // CSS
     wp_register_style('prefix_bootstrap', '//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css');

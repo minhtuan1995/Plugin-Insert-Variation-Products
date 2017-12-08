@@ -3,41 +3,52 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-//
-//$(window).load(function ()
-//{
-//    
-//});
-
-function isEmpty(obj) {
-    for(var key in obj) {
-        if(obj.hasOwnProperty(key))
-            return false;
-    }
-    return true;
-}
-
-function setActive(re_id) {
-    console.log(re_id);
-    $.ajax({
-		url: global.ajax,
-		success: function( data ) {
-			console.log(data);
-		}
-	})
-}
-
-function setInactive(re_id) {
-    console.log(re_id);
-    $.ajax({
-		url: global.ajax,
-		success: function( data ) {
-			console.log(data);
-		}
-	})
-}
 
 jQuery(document).ready(function($) {
+    
+    $('.redirection-active').change(function() {
+        
+        var item = $(this);
+        item.prop('disabled', true);
+
+        var changeValue;
+        if (item.is(":checked")) {
+            changeValue = 1;
+        } else {
+            changeValue = 0;
+        }
+        var re_id = item.parent().parent().parent().attr('re_id');
+        
+         $.post(
+            global.ajax, 
+            {   
+                id: re_id,
+                value: changeValue,
+                action: 'active_redirection' 
+            }, 
+            function(data) {
+                console.log("Updated status redirection " + re_id + " to " + changeValue);
+                item.prop('disabled', false);
+            });
+    })
+    
+    $('.button-delete').click(function() {
+        
+        var item = $(this);
+        var row = item.parent().parent();
+        item.prop('disabled', true);
+        var re_id = row.attr('re_id');
+         $.post(
+            global.ajax, 
+            {   
+                id: re_id,
+                action: 'delete_redirection' 
+            }, 
+            function(data) {
+                console.log("Deleted redirection: " + re_id);
+                row.remove();
+            });
+    })
     
     $(window).keydown(function(event){
         if(event.keyCode == 13) {
