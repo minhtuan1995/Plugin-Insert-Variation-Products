@@ -29,35 +29,36 @@ if (!class_exists('TD_Redirection')) {
 
         function redirection_check_redirection() {
 
-            if (isset($_SERVER['HTTP_REFERER'])) {
-
-                $check = strpos($_SERVER['HTTP_REFERER'], REDIRECTION_SOURCE);
-
-                if ($check !== false) {
-
-                    $dbModel = new DbModel(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
-
-                    $post_id = get_the_ID();
-
-                    if ($post_id != 999999) {
-                        $exists = $dbModel->check_exists_redirection($post_id, 'coupon');
-                        if ($exists != false) {
-                            $this->redirection_by_url(urldecode($exists['re_destination']));
-                        }
-                    } else {
-                        $queried_object = get_queried_object();
-                        if (isset($queried_object->taxonomy) && $queried_object->taxonomy == 'coupon_store') {
-                            $exists = $dbModel->check_exists_redirection($queried_object->term_id, 'store');
-                            if ($exists != false) {
-                                $this->redirection_by_url(urldecode($exists['re_destination']));
-                            }
-                        }
-                    }
-                }
+            if (isset($_SERVER['HTTP_REFERER']) && strpos($_SERVER['HTTP_REFERER'], REDIRECTION_SOURCE) != false) {
+                $this->redirection(TRUE);
             } else {
-                echo '<meta name="plugin" content="TD_Redirection">';
+                $this->redirection(FALSE);
             }
         }
+        
+        public function redirection($check_referer) {
+            $dbModel = new DbModel(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+
+            $post_id = get_the_ID();
+            
+            if ($post_id != 999999) {
+                $exists = $dbModel->check_exists_redirection($post_id, 'coupon');
+            } else {
+                $queried_object = get_queried_object();
+                if (isset($queried_object->taxonomy) && $queried_object->taxonomy == 'coupon_store') {
+                    $exists = $dbModel->check_exists_redirection($queried_object->term_id, 'store');
+                    }
+            }
+            
+            if ($exists != false) {
+                    if ($exists['re_active'] == 0) {
+                        $this->redirection_by_url(urldecode($exists['re_destination']));
+                    } elseif ($exists['re_active'] == 1 && $check_referer) {
+                        $this->redirection_by_url(urldecode($exists['re_destination']));
+                    }
+            }
+        }
+
 
         public function redirection_by_url($redirect_url = '') {
             if (!empty($redirect_url)) {

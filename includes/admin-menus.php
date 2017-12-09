@@ -7,14 +7,17 @@
  */
 
 function woocommerce_tools_admin_menu() {
-
-    add_menu_page('Woo Tools', 'Woo Tools', 'manage_options', 'variation-products-main', 'variation_products_main_page', 'dashicons-welcome-widgets-menus', 3);
+    //Maketing Tools
+    add_menu_page('Marketing Tools', 'Marketing Tools', 'manage_options', 'marketing-tools', 'function_redirection_page', 'dashicons-admin-multisite', 4);
+    add_submenu_page('marketing-tools', __('Redirection'), __('Redirection'), 'manage_options', 'marketing-tools');
+    // Woo Tools
+    add_menu_page('Woo Tools', 'Woo Tools', 'manage_options', 'variation-products-main', 'variation_products_main_page', 'dashicons-welcome-widgets-menus', 4);
     add_submenu_page('variation-products-main', __('Woo Converter'), __('Woo Converter'), 'manage_options', 'variation-products-main');
     add_submenu_page('variation-products-main', __('Woo Feed'), __('Woo Feed'), 'manage_options', 'function-woocommerce-feed', 'function_woocommerce_merchant_feed_page');
     add_submenu_page('variation-products-main', __('Shopify Feed'), __('Shopify Feed'), 'manage_options', 'function-shopify-feed', 'shopify_feed_main_page');
     
     add_submenu_page('variation-products-main', __('Test Function'), __('Test Function'), 'manage_options', 'function_insert_test_page', 'function_insert_test_page');
-    add_submenu_page('variation-products-main', __('Redirection'), __('Redirection'), 'manage_options', 'function-redirection', 'function_redirection_page');
+//    add_submenu_page('variation-products-main', __('Redirection'), __('Redirection'), 'manage_options', 'function-redirection', 'function_redirection_page');
 // Tools
     add_submenu_page('variation-products-main', __('Tool Options'), __('Tool Options'), 'manage_options', 'tool-options', 'tool_option_page');
 

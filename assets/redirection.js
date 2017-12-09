@@ -4,6 +4,14 @@
  * and open the template in the editor.
  */
 
+function isEmpty(obj) {
+    for(var key in obj) {
+        if(obj.hasOwnProperty(key))
+            return false;
+    }
+    return true;
+}
+
 jQuery(document).ready(function($) {
     
     $('.redirection-active').change(function() {

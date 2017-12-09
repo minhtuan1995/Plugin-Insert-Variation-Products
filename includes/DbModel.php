@@ -41,7 +41,11 @@ class DbModel {
         
         $result = mysqli_query($this->link, $query);
 
-        $return = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        if ($result) {
+            $return = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        } else {
+            $return = [];
+        }
 
         return $return;
         
@@ -53,7 +57,11 @@ class DbModel {
         
         $result = mysqli_query($this->link, $query);
 
-        $return = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        if ($result) {
+            $return = mysqli_fetch_all($result, MYSQLI_ASSOC);
+        } else {
+            $return = [];
+        }
 
         return $return;
         
@@ -74,7 +82,7 @@ class DbModel {
                         "' . urlencode($destination) . '",
                         "' . $type . '",
                         ' . $active . ')';
-
+            
             $result = mysqli_query($this->link, $query);
             return true;
         }
@@ -135,10 +143,12 @@ class DbModel {
         
     }
     
-    public function getAllCouponStore() {
+    public function getAllCouponStore($store_name = '') {
         
         $query = "SELECT wp_terms.term_id, wp_terms.name FROM wp_terms INNER JOIN wp_term_taxonomy ON wp_terms.term_id = wp_term_taxonomy.term_id WHERE wp_term_taxonomy.taxonomy = 'coupon_store'";
-
+        if (!empty($store_name)) {
+            $query .= "AND wp_terms.name like '%" . $store_name . "%'";
+        }
         $result = mysqli_query($this->link, $query);
 
         $return = mysqli_fetch_all($result, MYSQLI_ASSOC);

@@ -61,7 +61,7 @@ function redirection_create_db() {
             `re_source_multi` text NOT NULL,
             `re_destination` text NOT NULL,
             `re_type` tinytext NOT NULL,
-            `re_active` bit NOT NULL,
+            `re_active` tinyint NOT NULL,
             UNIQUE KEY re_id (re_id)
             )' . $charset_collate . ';
                 
@@ -309,7 +309,8 @@ function ja_ajax_search_store() {
         
         $dbModel = new DbModel(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
         
-	$results = $dbModel->getAllCouponStore();
+        $store_name = $_POST['search'];
+	$results = $dbModel->getAllCouponStore($store_name);
         
 	$items = array();
 	if ( !empty($results) ) {
@@ -333,12 +334,13 @@ function ja_ajax_set_active_redirection() {
     
     $dbModel = new DbModel(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
     
-    $dbModel->update_active_redirection($re_id, $re_active);
+    $result = $dbModel->update_active_redirection($re_id, $re_active);
     
     $return['status'] = 'ok';
     $return['re_id'] = $re_id;
     $return['re_active'] = $re_active;
-
+    $return['result'] = $result;
+    
     wp_send_json_success( $return );
 }
 
