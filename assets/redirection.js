@@ -14,6 +14,74 @@ function isEmpty(obj) {
 
 jQuery(document).ready(function($) {
     
+    $(".btn[data-target='#myEditModal']").click(function() {
+            var columnHeadings = $("thead th").map(function() {
+                      return $(this).text();
+                   }).get();
+            columnHeadings.pop();
+            var columnValues = $(this).parent().siblings().map(function() {
+                      return $(this).text();
+            }).get();
+            var columnChecks = $(this).parent().siblings().map(function() {
+                      return $(this).children().children().is(":checked");
+            }).get();
+            
+            console.log(columnChecks);
+       var modalBody = $('<div id="modalContent"></div>');
+       var modalForm = $('<form role="form" id="edit-redirection-modal" name="edit-redirection-modal" action="admin-ajax.php" method="post"></form>');
+       $.each(columnHeadings, function(i, columnHeader) {
+           var formGroup;
+           var columnID = columnHeader.replace(/ /g, '_').toLowerCase();
+           if (columnHeader == "ReID") {
+               formGroup = $('<div class="form-group hidden"></div>');
+           } else {
+               formGroup = $('<div class="form-group"></div>');
+           }
+            formGroup.append('<label for="'+columnHeader+'">'+columnHeader+'</label>');
+            
+            var disableInput = "";
+            if (columnHeader == "PID" || columnHeader == "Type" || columnHeader == "Title") {
+               disableInput = "disabled";
+            } 
+            
+            if (columnHeader == "Status") {
+               var string = '<select class="form-control" name="'+columnID+'" id="'+columnID+'" value="'+columnValues[i]+'" '+ disableInput +'>';
+                
+               if (columnChecks[i]) {
+                   string += '<option value="1" selected>Enable</option><option value="0">Disable</option></select>';
+               } else {
+                   string += '<option value="1">Enable</option><option value="0" selected>Disable</option></select>';
+               }
+               
+                formGroup.append(string); 
+                
+            } else {
+                formGroup.append('<input class="form-control" name="'+columnID+'" id="'+columnID+'" value="'+columnValues[i]+'" '+ disableInput +'/>'); 
+            }
+            
+            modalForm.append(formGroup);
+       });
+       modalBody.append(modalForm);
+       $('.modal-body').html(modalBody);
+     });
+     $('.modal-footer .btn-primary').click(function() {
+        //$('form[name="modalForm"]').submit();
+        var data = $('#edit-redirection-modal').serialize();
+        console.log(data);
+        console.log("SUBMITED");
+        
+        $.post(
+            global.ajax, 
+            {   
+                data: data,
+                action: 'update_redirection' 
+            }, 
+            function(data) {
+                console.log(data);
+            });
+            
+     });
+    
     $('.redirection-active').change(function() {
         
         var item = $(this);
@@ -117,7 +185,8 @@ jQuery(document).ready(function($) {
 
     $('#dataTables-example').DataTable({
             responsive: true,
-            "bDestroy": true
+            "bDestroy": true,
+            "autoWidth": false
         });
         
     

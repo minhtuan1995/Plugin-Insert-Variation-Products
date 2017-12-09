@@ -19,6 +19,12 @@ class DbModel {
         $this->link = mysqli_connect($host, $user, $pass, $dbname);
     }
     
+    public function query($query) {
+        $result = mysqli_query($this->link, $query);
+        return $result;
+    }
+
+
     public function getAllRedirection($type = '') {
         
         $query = "SELECT * FROM " . DB_REDIRECTION;
@@ -53,7 +59,7 @@ class DbModel {
     
     public function getAllCouponRedirection() {
         
-        $query = "SELECT re_id, re_source, re_destination, re_type, re_active, post_title as 'name' FROM " . DB_REDIRECTION . ' INNER JOIN wp_posts ON re_source = wp_posts.ID WHERE re_type = "coupon"';
+        $query = "SELECT re_id, re_source, re_destination, re_type, re_active, post_title as 'name', re_count_non, re_count_redirect, re_count FROM " . DB_REDIRECTION . ' INNER JOIN wp_posts ON re_source = wp_posts.ID WHERE re_type = "coupon"';
         
         $result = mysqli_query($this->link, $query);
 
@@ -75,14 +81,14 @@ class DbModel {
             $this->update_redirection($exists['re_id'], $source, $destination, $type, $source_multi);
             return false;
         } else {
-            $query = '  INSERT INTO ' . DB_REDIRECTION . '(re_source, re_source_multi, re_destination, re_type, re_active)
+            $query = '  INSERT INTO ' . DB_REDIRECTION . '(re_source, re_source_multi, re_destination, re_type, re_active, re_count_non, re_count_redirect, re_count)
                         VALUES (
                         ' . $source . ',
                         "' . urlencode($source_multi) . '",
                         "' . urlencode($destination) . '",
-                        "' . $type . '",
-                        ' . $active . ')';
-            
+                        "' . $type . '",'
+                        . $active . 
+                        ', 0, 0, 0)';
             $result = mysqli_query($this->link, $query);
             return true;
         }
@@ -140,6 +146,28 @@ class DbModel {
         $result = mysqli_query($this->link, $query);
 
         return true;
+        
+    }
+    
+    public function update_count($re_id, $type_redirection = false) {
+        
+        if ($type_redirection) {
+            $query = '  UPDATE ' . DB_REDIRECTION . '
+                        SET 
+                        re_count = re_count + 1,
+                        re_count_redirect = re_count_redirect + 1
+                        WHERE re_id = ' . $re_id;
+        } else {
+            $query = '  UPDATE ' . DB_REDIRECTION . '
+                        SET 
+                        re_count = re_count + 1,
+                        re_count_non = re_count_non + 1
+                        WHERE re_id = ' . $re_id;
+        }
+        
+        $result = mysqli_query($this->link, $query);
+
+        return $result;
         
     }
     

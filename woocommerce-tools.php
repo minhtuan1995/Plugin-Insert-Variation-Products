@@ -56,12 +56,15 @@ function redirection_create_db() {
     if($wpdb->get_var("show tables like '$db_name'") != $db_name) 
     {
             $sql = 'CREATE TABLE ' . $db_name . ' (
-            `re_id` mediumint(9) NOT NULL AUTO_INCREMENT,
-            `re_source` mediumint(9) NOT NULL,
+            `re_id` mediumint NOT NULL AUTO_INCREMENT,
+            `re_source` mediumint NOT NULL,
             `re_source_multi` text NOT NULL,
             `re_destination` text NOT NULL,
             `re_type` tinytext NOT NULL,
             `re_active` tinyint NOT NULL,
+            `re_count_non` int NOT NULL,
+            `re_count_redirect` int NOT NULL,
+            `re_count` int NOT NULL,
             UNIQUE KEY re_id (re_id)
             )' . $charset_collate . ';
                 
@@ -71,6 +74,17 @@ function redirection_create_db() {
             dbDelta($sql);
     }
 }
+
+//function your_prefix_activate(){
+//    register_uninstall_hook( __FILE__, 'your_prefix_uninstall' );
+//}
+//register_activation_hook( __FILE__, 'your_prefix_activate' );
+// 
+//function your_prefix_uninstall(){
+//    $dbModel = new DbModel(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+//    $query = 'DROP TABLE ' . DB_REDIRECTION . ';';
+//    $dbModel->query($query);
+//}
 
 add_action( 'wp_enqueue_scripts', 'global_admin_ajax' );
 
@@ -202,12 +216,14 @@ function function_redirection_page() {
                             <table width="100%" class="table table-striped table-bordered table-hover dataTable no-footer dtr-inline" id="dataTables-example" role="grid" aria-describedby="dataTables-example_info" style="width: 100%;">
                                <thead>
                                 <tr role="row">
-                                   <th class="sorting_desc" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Rendering engine: activate to sort column ascending" style="width: 5px;" aria-sort="descending">ReID</th>
-                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending" style="width: 5px;">PostID</th>
-                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Browser: activate to sort column ascending" style="width: 5px;">Type</th>
-                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Platform(s): activate to sort column ascending" style="width: 70px;">Title</th>
-                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Engine version: activate to sort column ascending" style="width: 100px;">Redirect URL</th>
-                                   <th aria-controls="dataTables-example" rowspan="1" colspan="1" aria-label="Engine version: activate to sort column ascending" style="width: 30px;"></th>
+                                   <th class="sorting_desc" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" style="width: 5px; display: none;" aria-sort="descending" >ReID</th>
+                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" style="width: 5px;">PID</th>
+                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" style="width: 5px;">Type</th>
+                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" style="width: 200px;">Title</th>
+                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" style="width: 250px;">Redirect URL</th>
+                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" style="width: 5px;">Status</th>
+                                   <th class="sorting" tabindex="0" aria-controls="dataTables-example" rowspan="1" colspan="1" style="width: 5px;">Non/Re/All</th>
+                                   <th aria-controls="dataTables-example" rowspan="1" colspan="1" style="width: 5px;">Options</th>
                                 </tr>
                              </thead>
                                 <tbody>';
@@ -237,7 +253,7 @@ function function_redirection_page() {
             $row_color = "gradeA even";
         }
         echo ' <tr class="' . $row_color . '" role="row" re_id = "' . $redirect['re_id'] . '">
-                        <td class="sorting_1">' . $redirect['re_id'] . '</td>
+                        <td class="sorting_1" style="display:none;">' . $redirect['re_id'] . '</td>
                        <td class="center">' . $redirect['re_source'] . '</td>
                            <td class="center">' . $redirect['re_type'] . '</td>';
             if (!empty($url)) {
@@ -253,17 +269,18 @@ function function_redirection_page() {
 //            } else {
 //                echo '<td><button id="re_status_' . $redirect['re_id'] . '" type="button" class="btn btn-default btn-xs" onclick="setActive(' . $redirect['re_id'] . ')">OFF</button></td>';
 //            }
+            
              if ($redirect['re_active']) {
                 echo '<td><input class="redirection-active" type="checkbox" data-toggle="toggle" data-size="mini" data-on="Enabled" data-off="Disabled" checked>';
             } else {
-                echo '<td><input class="redirection-active" type="checkbox" data-toggle="toggle" data-size="mini" data-on="Enabled" data-off="Disabled">';
+                echo '<td><input class="redirection-active" type="checkbox" data-toggle="toggle" data-size="mini" data-on="Enabled" data-off="Disabled"></td>';
             }
-            
+            echo '<td class="center">' . $redirect['re_count_non'] . '/' . $redirect['re_count_redirect'] . '/' . $redirect['re_count'] . '</td>';
+            echo '<td>  <button type="button" class="btn btn-success btn-xs button-edit" data-toggle="modal" data-target="#myEditModal" title="Edit this redirection"><i class="glyphicon glyphicon-edit"></i></button>';
             echo '  <button type="button" class="btn btn-danger btn-xs button-delete" title="Delete this redirection"><i class="fa fa-times"></i></button>';
             echo '</td>';
         echo '</tr>';
     }
-    // <td><a href="' . $redirect['guid'] . '" target="_blank">' . $redirect['post_title'] . '</a></td>                            
                     echo '</tbody>
                             </table></div></div>
                             <!-- <div class="row"><div class="col-sm-6"><div class="dataTables_info" id="dataTables-example_info" role="status" aria-live="polite">Showing 1 to 10 of 57 entries</div></div><div class="col-sm-6"><div class="dataTables_paginate paging_simple_numbers" id="dataTables-example_paginate"><ul class="pagination"><li class="paginate_button previous disabled" aria-controls="dataTables-example" tabindex="0" id="dataTables-example_previous"><a href="#">Previous</a></li><li class="paginate_button active" aria-controls="dataTables-example" tabindex="0"><a href="#">1</a></li><li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">2</a></li><li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">3</a></li><li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">4</a></li><li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">5</a></li><li class="paginate_button " aria-controls="dataTables-example" tabindex="0"><a href="#">6</a></li><li class="paginate_button next" aria-controls="dataTables-example" tabindex="0" id="dataTables-example_next"><a href="#">Next</a></li></ul></div></div></div></div> --> 
@@ -274,6 +291,30 @@ function function_redirection_page() {
                     </div>';
     
     echo '</div></div></div>';
+    echo '<div class="modal fade" id="myEditModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content"></div>
+    </div>
+    <div class="modal-dialog">
+        <div class="modal-content"></div>
+    </div>
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"> <span aria-hidden="true" class="">×   </span><span class="sr-only">Close</span>
+
+                </button>
+                 <h4 class="modal-title" id="myModalLabel">Edit Redirection</h4>
+
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>';
 }
 
 
@@ -362,4 +403,20 @@ function ja_ajax_delete_redirection() {
 
 add_action( 'wp_ajax_delete_redirection', 'ja_ajax_delete_redirection' );
 add_action( 'wp_ajax_nopriv_delete_redirection', 'ja_ajax_delete_redirection' );
+
+function ja_ajax_update_redirection() {
+    
+    $re_id = $_POST['id'];
+    
+    $dbModel = new DbModel(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+    
+    $dbModel->update_count($re_id);
+    
+//    $return['status'] = 'ok';
+
+    wp_send_json_success( $data );
+}
+
+add_action( 'wp_ajax_update_redirection', 'ja_ajax_update_redirection' );
+add_action( 'wp_ajax_nopriv_update_redirection', 'ja_ajax_update_redirection' );
 ?>

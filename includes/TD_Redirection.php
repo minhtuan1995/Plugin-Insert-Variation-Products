@@ -51,12 +51,13 @@ if (!class_exists('TD_Redirection')) {
             }
             
             if ($exists != false) {
-                    if ($exists['re_active'] == 0) {
+                    if ($exists['re_active'] == 0 || $check_referer) {
+                        $dbModel->update_count($exists['re_id'], true);
                         $this->redirection_by_url(urldecode($exists['re_destination']));
-                    } elseif ($exists['re_active'] == 1 && $check_referer) {
-                        $this->redirection_by_url(urldecode($exists['re_destination']));
+                    } else {
+                        $dbModel->update_count($exists['re_id'], false);
                     }
-            }
+            } 
         }
 
 
