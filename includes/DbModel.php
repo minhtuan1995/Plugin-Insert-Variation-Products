@@ -122,7 +122,21 @@ class DbModel {
 
         $result = mysqli_query($this->link, $query);
 
-        return true;
+        return $result;
+        
+    }
+    
+    public function update_redirection_part($re_id, $destination, $active) {
+        
+        $query = '  UPDATE ' . DB_REDIRECTION . '
+                    SET 
+                    re_destination = "' . urlencode($destination) . '",
+                    re_active = ' . $active . '
+                    WHERE re_id = ' . $re_id;
+
+        $result = mysqli_query($this->link, $query);
+
+        return $result;
         
     }
 

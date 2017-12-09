@@ -26,13 +26,12 @@ jQuery(document).ready(function($) {
                       return $(this).children().children().is(":checked");
             }).get();
             
-            console.log(columnChecks);
        var modalBody = $('<div id="modalContent"></div>');
        var modalForm = $('<form role="form" id="edit-redirection-modal" name="edit-redirection-modal" action="admin-ajax.php" method="post"></form>');
        $.each(columnHeadings, function(i, columnHeader) {
            var formGroup;
            var columnID = columnHeader.replace(/ /g, '_').toLowerCase();
-           if (columnHeader == "ReID") {
+           if (columnHeader == "ReID" || columnHeader == "PID") {
                formGroup = $('<div class="form-group hidden"></div>');
            } else {
                formGroup = $('<div class="form-group"></div>');
@@ -40,7 +39,7 @@ jQuery(document).ready(function($) {
             formGroup.append('<label for="'+columnHeader+'">'+columnHeader+'</label>');
             
             var disableInput = "";
-            if (columnHeader == "PID" || columnHeader == "Type" || columnHeader == "Title") {
+            if (columnHeader == "Type" || columnHeader == "Title" || columnHeader == "Non/Re/All") {
                disableInput = "disabled";
             } 
             
@@ -64,12 +63,9 @@ jQuery(document).ready(function($) {
        modalBody.append(modalForm);
        $('.modal-body').html(modalBody);
      });
+     
      $('.modal-footer .btn-primary').click(function() {
-        //$('form[name="modalForm"]').submit();
-        var data = $('#edit-redirection-modal').serialize();
-        console.log(data);
-        console.log("SUBMITED");
-        
+        var data = $('#edit-redirection-modal').serializeArray();
         $.post(
             global.ajax, 
             {   
@@ -77,7 +73,15 @@ jQuery(document).ready(function($) {
                 action: 'update_redirection' 
             }, 
             function(data) {
-                console.log(data);
+                $('#close-update-modal').click();
+                $("#redirect_url_" + data.data.input.reid).html(data.data.input.redirect_url);
+                if (data.data.input.status == "1") {
+                    $("#re_active_" + data.data.input.reid).prop('checked', true);
+                    $("#re_active_" + data.data.input.reid).parent().attr('class', 'toggle btn btn-xs btn-primary');
+                } else {
+                    $("#re_active_" + data.data.input.reid).prop('checked', false);
+                    $("#re_active_" + data.data.input.reid).parent().attr('class', 'toggle btn btn-xs btn-default off');
+                }
             });
             
      });

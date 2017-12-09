@@ -11,13 +11,13 @@
  *
  * @author dmtuan
  */
-//if (!defined('REDIRECTION_SOURCE')) {
-//    define('REDIRECTION_SOURCE', 'google.com');
-//}
-
 if (!defined('REDIRECTION_SOURCE')) {
-    define('REDIRECTION_SOURCE', 'shoppingstore02.ga');
+    define('REDIRECTION_SOURCE', 'google.com');
 }
+
+//if (!defined('REDIRECTION_SOURCE')) {
+//    define('REDIRECTION_SOURCE', 'shoppingstore02.ga');
+//}
 
 if (!class_exists('TD_Redirection')) {
 

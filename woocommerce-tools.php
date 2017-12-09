@@ -43,8 +43,7 @@ function woocommerce_tools_plugin_init() {
  */
 
 function function_insert_test_page() {
-    echo get_term_link(34);
-    //echo get_permalink('400');
+//    echo get_term_link(34);
 }
 
 function redirection_create_db() {
@@ -262,18 +261,12 @@ function function_redirection_page() {
                 echo '<td class="center">' . $redirect['name'] . '</td>';
             }
                             
-            echo '<td>' . urldecode($redirect['re_destination']) . '</td>';
+            echo '<td id="redirect_url_' . $redirect['re_id'] . '">' . urldecode($redirect['re_destination']) . '</td>';
                        
-//            if ($redirect['re_active']) {
-//                echo '<td><button id="re_status_' . $redirect['re_id'] . '" type="button" class="btn btn-success btn-xs" onclick="setInactive(' . $redirect['re_id'] . ')">ON</button></td>';
-//            } else {
-//                echo '<td><button id="re_status_' . $redirect['re_id'] . '" type="button" class="btn btn-default btn-xs" onclick="setActive(' . $redirect['re_id'] . ')">OFF</button></td>';
-//            }
-            
              if ($redirect['re_active']) {
-                echo '<td><input class="redirection-active" type="checkbox" data-toggle="toggle" data-size="mini" data-on="Enabled" data-off="Disabled" checked>';
+                echo '<td><input id="re_active_' . $redirect['re_id'] . '" class="redirection-active" type="checkbox" data-toggle="toggle" data-size="mini" data-on="Enabled" data-off="Disabled" checked>';
             } else {
-                echo '<td><input class="redirection-active" type="checkbox" data-toggle="toggle" data-size="mini" data-on="Enabled" data-off="Disabled"></td>';
+                echo '<td><input id="re_active_' . $redirect['re_id'] . '" class="redirection-active" type="checkbox" data-toggle="toggle" data-size="mini" data-on="Enabled" data-off="Disabled"></td>';
             }
             echo '<td class="center">' . $redirect['re_count_non'] . '/' . $redirect['re_count_redirect'] . '/' . $redirect['re_count'] . '</td>';
             echo '<td>  <button type="button" class="btn btn-success btn-xs button-edit" data-toggle="modal" data-target="#myEditModal" title="Edit this redirection"><i class="glyphicon glyphicon-edit"></i></button>';
@@ -309,7 +302,7 @@ function function_redirection_page() {
             </div>
             <div class="modal-body"></div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" id="close-update-modal" class="btn btn-default" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary">Save changes</button>
             </div>
         </div>
@@ -331,12 +324,9 @@ function ja_ajax_search() {
 	$items = array();
 	if ( !empty( $results->posts ) ) {
 		foreach ( $results->posts as $result ) {
-                    
                     $item['ID'] = $result->ID;
                     $item['post_title'] = $result->post_title;
                     $items[] = $item;
-//			$items[] = $result->post_title;
-                        
 		}
 	}
 	wp_send_json_success( $items );
@@ -394,9 +384,9 @@ function ja_ajax_delete_redirection() {
     
     $dbModel = new DbModel(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
     
-    $dbModel->delete_redirection($re_id);
+    $result = $dbModel->delete_redirection($re_id);
     
-    $return['status'] = 'ok';
+    $return['data'] = $result;
 
     wp_send_json_success( $return );
 }
@@ -406,17 +396,29 @@ add_action( 'wp_ajax_nopriv_delete_redirection', 'ja_ajax_delete_redirection' );
 
 function ja_ajax_update_redirection() {
     
-    $re_id = $_POST['id'];
+    if (!isset($_POST['data'])) {
+        return false;
+    }
+    
+    foreach ($_POST['data'] as $data) {
+        $input[$data['name']] = $data['value'];
+    }
+    
+    $re_id = $input['reid'];
+    $destination = $input['redirect_url'];
+    $active = $input['status'];
     
     $dbModel = new DbModel(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
     
-    $dbModel->update_count($re_id);
+    $result = $dbModel->update_redirection_part($re_id, $destination, $active);
     
-//    $return['status'] = 'ok';
-
-    wp_send_json_success( $data );
+    $return['data'] = $result;
+    $return['input'] = $input;
+    
+    wp_send_json_success( $return );
 }
 
 add_action( 'wp_ajax_update_redirection', 'ja_ajax_update_redirection' );
 add_action( 'wp_ajax_nopriv_update_redirection', 'ja_ajax_update_redirection' );
+
 ?>
