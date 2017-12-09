@@ -21,7 +21,6 @@ define('MAX_PRODUCT_PAGE', 100);     // Number of product when process all produ
 require_once( WC_PLUGIN_DIR . 'google-api/vendor/autoload.php' );
 //require_once('../google-api/vendor/autoload.php' );
 require_once('includes/DbModel.php');
-require_once('includes/TD_Redirection.php');
 require_once('includes/function-merchant-woocommerce.php');
 require_once('includes/function-merchant-shopify.php');
 require_once('includes/function-insert-variation.php');

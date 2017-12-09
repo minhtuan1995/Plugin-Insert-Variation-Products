@@ -2,18 +2,6 @@
 
 function jsonConvert($product) {
     
-    //$strJson = file_get_contents('input/353736654880.json');
-//    $product = json_decode($rawData, true);
-//
-//    echo "<pre>";
-//    print_r($product);
-//    echo "<pre>";
-//    exit;
-//    $product = $data['product'];
-
-    // Attributes
-//     $main_attributes = array("product-type", "size", "color");
-     
     $main_attributes = array();
     
     foreach ($product['options'] as $option) {
@@ -65,12 +53,6 @@ function jsonConvert($product) {
         if (isset($variant['option3'])) {
             $attributes['color'] = $variant['option3'];
         }
-//        if (isset($variant['option4'])) {
-//            $attributes[] = array(
-//                'name' => 'Option 4',
-//                'option' => $variant['option4']
-//            );
-//        }
 
         $var_images = array();
         foreach ($product['images'] as $image) {

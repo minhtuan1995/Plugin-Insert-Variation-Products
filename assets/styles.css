@@ -10,7 +10,3 @@ and open the template in the editor.
 body {
     background: #f1f1f1 !important;
 }
-
-table.dataTable thead th, table.dataTable thead td {
-    padding: 5px 0px 5px 5px !important;
-}

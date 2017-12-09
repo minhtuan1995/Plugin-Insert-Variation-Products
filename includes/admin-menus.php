@@ -7,9 +7,6 @@
  */
 
 function woocommerce_tools_admin_menu() {
-    //Maketing Tools
-    add_menu_page('Marketing Tools', 'Marketing Tools', 'manage_options', 'marketing-tools', 'function_redirection_page', 'dashicons-admin-multisite', 4);
-    add_submenu_page('marketing-tools', __('Redirection'), __('Redirection'), 'manage_options', 'marketing-tools');
     // Woo Tools
     add_menu_page('Woo Tools', 'Woo Tools', 'manage_options', 'variation-products-main', 'variation_products_main_page', 'dashicons-welcome-widgets-menus', 4);
     add_submenu_page('variation-products-main', __('Woo Converter'), __('Woo Converter'), 'manage_options', 'variation-products-main');
